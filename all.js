@@ -56,3 +56,25 @@ function getId(element) {
 function copyToClipboard(text) {
     window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 }
+
+/**
+* Fetch account data for UI when
+* - User switches accounts in wallet
+* - User switches networks in wallet
+* - User connects wallet initially
+*/
+async function refreshAccountData () {
+    // If any current data is displayed when
+    // the user is switching acounts in the wallet
+    // immediate hide this data
+    document.querySelector("#connected").style.display = "none";
+    document.querySelector("#prepare").style.display = "block";
+
+    // Disable button while UI is loading.
+    // fetchAccountData() will take a while as it communicates
+    // with Ethereum node via JSON-RPC and loads chain data
+    // over an API call.
+    document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+    await fetchAccountData(provider);
+    document.querySelector("#btn-connect").removeAttribute("disabled")
+}
