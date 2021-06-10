@@ -1,0 +1,48 @@
+.container {
+    display: table;
+    margin-right: auto;
+    margin-left: auto;
+    text-align:center;
+}
+
+.no_display {
+    display: none;
+}
+
+#btn-connect {
+    background-color: #fcbd24;
+    color: black;
+}
+
+#progress {
+    color: #fcbd24;
+}
+
+#buy-obs-result {
+    background-color: white;
+    color: black;
+}
+
+#btn-disconnect {
+    background-color: #fcbd24;
+    color: black;
+}
+
+#openImage {
+    background-color: #fcbd24;
+    color: black;
+}
+
+#template-auction tr th.bidAmount input {
+    color: black;
+    border: 1px solid #fafafa;
+    -webkit-box-shadow: 0 0 6px #fcbd24;
+    -moz-box-shadow: 0 0 5px #fcbd24;
+    box-shadow: 0 0 5px #fcbd24;
+}
+
+#template-auction tr th.allow button,
+#template-auction tr th.bid button {
+    background-color: #fcbd24;
+    color: black;
+}
