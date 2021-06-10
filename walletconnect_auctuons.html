@@ -513,13 +513,6 @@
   async function onResultClick () {
     window.open(resultURL, '_blank').focus();
   }
-  function  getId(element) {
-    alert("row" + element.parentNode.parentNode.rowIndex +
-      " - column" + element.parentNode.cellIndex);
-  }
-  function copyToClipboard(text) {
-    window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-  }
   async function onOpenImageClick (element) {
     let text = 'https://openbisea.io/detailsnft-v2?tokenID=' + auctionsNormalized[element.parentNode.parentNode.rowIndex].tokenID + "&contract=" + auctionsNormalized[element.parentNode.parentNode.rowIndex].contract;
 

@@ -727,11 +727,6 @@
     clearInterval(sendOrderStatus);
   }
 
-  function getId (element) {
-    alert("row" + element.parentNode.parentNode.rowIndex +
-      " - column" + element.parentNode.cellIndex);
-  }
-
   async function onOpenImageClick (element) {
     console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
     window.open(auctionsNormalized[element.parentNode.parentNode.rowIndex].image, '_blank').focus();

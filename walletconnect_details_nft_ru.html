@@ -149,6 +149,7 @@
 <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+<script type="text/javascript" src="all.js"></script>
 
 <script>
   "use strict";
@@ -571,11 +572,6 @@
 
   async function onCreateClick () {
       window.open("https://ru.openbisea.io/auctioncreate?tokenID=" + tokenIDsaved, '_blank').focus();
-  }
-
-  function  getId(element) {
-      alert("row" + element.parentNode.parentNode.rowIndex +
-          " - column" + element.parentNode.cellIndex);
   }
   async function onOpenImageClick (element) {
       console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);

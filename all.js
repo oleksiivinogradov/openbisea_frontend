@@ -47,3 +47,12 @@ function duration(t0, t1) {
 
     return t;
 }
+
+function getId(element) {
+    alert("row" + element.parentNode.parentNode.rowIndex +
+      " - column" + element.parentNode.cellIndex);
+}
+
+function copyToClipboard(text) {
+    window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+}
