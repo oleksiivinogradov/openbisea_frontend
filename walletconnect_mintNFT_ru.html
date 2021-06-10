@@ -1,0 +1,483 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<div class="container" style="width:800px; margin:0 auto;text-align: center;">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Создать свой NFT</h1>
+
+            <div class="alert alert-danger" id="alert-error-https" style="display: none">
+                You can run this example only over HTTPS connection.
+            </div>
+
+            <div id="prepare">
+                <p>Кошелек не подключен. Подключите кошелек чтобы увидить ваши аккаунты и балансы в BNB.</p>
+                <button class="btn btn-primary" id="btn-connect" style="background-color: #fcbd24;color:black">
+                    Подключить кошелек
+                </button>
+                <br>
+                <br>
+
+            </div>
+
+            <div id="connected" style="display: none; text-align: center;">
+
+                <input type="text" placeholder="название" name="name" value="" id="name" style="border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
+                <br>
+                <br>
+
+                <textarea  id="description"  name="textarea" placeholder="описание" style="width:250px;height:150px;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"></textarea>
+                <br>
+                <br>
+
+                <input type="text" placeholder="Создатель" name="artist" value="" id="artist" style="border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
+                <br>
+                <br>
+
+                <input type="text" placeholder="Линк на социальную сеть" name="public_profile_link" value="" id="public_profile_link" style="border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
+                <br>
+                <br>
+
+                <button class="btn btn-primary" id="imageUpload" style="background-color: #fcbd24;color:black" onclick="document.getElementById('fileImageUpload').click();" > Загрузить картинку </button>
+                <input type="file" id="fileImageUpload" style="display:none;" onclick="this.value = null"/>
+                <br>
+                <br>
+                <button class="btn btn-primary" id="animationUpload" style="background-color: #fcbd24;color:black" onclick="document.getElementById('fileAnimationUpload').click();" > Загрузить видео </button>
+                <input type="file" id="fileAnimationUpload" style="display:none;"  onclick="this.value = null"/>
+                <br>
+                <br>
+
+                <button class="btn btn-primary" id="mint" style="background-color: #fcbd24;color:black" disabled> Создать NFT </button>
+                <br>
+                <span id="progress" style="color:#fcbd24;display: none;"> Транзакция обрабатывается ...</span>
+
+                <br>
+                <div id="resultstrans" style="text-align: center;">
+                    <button class="btn btn-primary" id="buy-obs-result" style="display: none;background-color: white;color:black;" > Проверить статус транзакции </button>
+                    <button class="btn btn-primary" id="link-to-nft-details" style="display: none;background-color: white;color:black;" > Открыть страничку NFT </button>
+
+                </div>
+
+                <hr>
+
+                <div id="network">
+                    <p>
+                        <strong>Сеть:</strong> <span id="network-name"></span>
+                    </p>
+
+                    <p>
+                        <strong>Выбранный аккаунт:</strong> <span id="selected-account"></span>
+                    </p>
+                    <button class="btn btn-primary" id="btn-disconnect" style="background-color: #fcbd24;color:black">
+                        Отключить кошелек
+                    </button>
+
+                </div>
+
+                <hr>
+
+                <h3>Балансы всех аккаунтов</h3>
+
+                <table class="table table-listing">
+                    <thead>
+                    <th>Адрес</th>
+                    <th>баланс BNB</th>
+                    </thead>
+
+                    <tbody id="accounts">
+                    </tbody>
+                </table>
+
+                <p>Можете переключится между аккаунтами, если ваш кошелек поддерживает эту опцию.</p>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- We use simple <template> templating for the example -->
+    <div id="templates" style="display: none">
+        <template id="template-balance">
+            <tr>
+                <th class="address"></th>
+                <td class="balance"></td>
+            </tr>
+        </template>
+    </div>
+</div>
+
+<!--
+  Use unpkg CDN to load all NPM packages to vanilla Javascript - read more at http://unpkg.com
+  On your deployment, you properly either want to use a preprocessing tool like webpack
+  to include these files, or extract NPM archives and manually host the files inside.
+  TODO: Pin down all versions.
+-->
+
+<script type="text/javascript" src="https://unpkg.com/web3@1.2.11/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/web3modal@1.9.0/dist/index.js"></script>
+<script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+
+<script>
+  "use strict";
+
+  /**
+   * Example JavaScript code that interacts with the page and Web3 wallets
+   */
+
+    // Unpkg imports
+  const Web3Modal = window.Web3Modal.default;
+  const WalletConnectProvider = window.WalletConnectProvider.default;
+  const Fortmatic = window.Fortmatic;
+  const evmChains = window.evmChains;
+
+  // Web3modal instance
+  let web3Modal
+
+  // Chosen wallet provider given by the dialog window
+  let provider;
+
+  // Address of the selected account
+  let selectedAccount;
+
+  //bscan
+  let resultURL;
+  /**
+   * Setup the orchestra
+   */
+  function init () {
+
+    console.log("Initializing example");
+    console.log("WalletConnectProvider is", WalletConnectProvider);
+    console.log("Fortmatic is", Fortmatic);
+    console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
+
+    // Check that the web page is run in a secure context,
+    // as otherwise MetaMask won't be available
+    if (location.protocol !== 'https:') {
+      // https://ethereum.stackexchange.com/a/62217/620
+      const alert = document.querySelector("#alert-error-https");
+      alert.style.display = "block";
+      document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+      return;
+    }
+
+    // Tell Web3modal what providers we have available.
+    // Built-in web browser provider (only one can exist as a time)
+    // like MetaMask, Brave or Opera is added automatically by Web3modal
+    const providerOptions = {
+      walletconnect: {
+        package: WalletConnectProvider,
+        options: {
+          // Mikko's test key - don't copy as your mileage may vary
+          infuraId: "bb7b522604e54a2f8ad251e7417b2355",
+        }
+      },
+
+      // fortmatic: {
+      //   package: Fortmatic,
+      //   options: {
+      //     // Mikko's TESTNET api key
+      //     key: "pk_test_391E26A3B43A3350"
+      //   }
+      // }
+    };
+
+    web3Modal = new Web3Modal({
+      cacheProvider: false, // optional
+      providerOptions, // required
+      disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
+    });
+
+    console.log("Web3Modal instance is", web3Modal);
+  }
+
+  /**
+   * Kick in the UI action after Web3modal dialog has chosen a provider
+   */
+  async function fetchAccountData () {
+
+    // Get a Web3 instance for the wallet
+    const web3 = new Web3(provider);
+
+    console.log("Web3 instance is", web3);
+
+    // Get connected chain id from Ethereum node
+    const chainId = await web3.eth.getChainId();
+    // Load chain information over an HTTP API
+    const chainData = evmChains.getChain(chainId);
+    document.querySelector("#network-name").textContent = chainData.name;
+
+    // Get list of accounts of the connected wallet
+    const accounts = await web3.eth.getAccounts();
+
+    // MetaMask does not give you all accounts, only the selected account
+    console.log("Got accounts", accounts);
+    selectedAccount = accounts[0];
+
+    document.querySelector("#selected-account").textContent = selectedAccount;
+
+    // Get a handl
+    const template = document.querySelector("#template-balance");
+    const accountContainer = document.querySelector("#accounts");
+
+    // Purge UI elements any previously loaded accounts
+    accountContainer.innerHTML = '';
+
+    // Go through all accounts and get their ETH balance
+    const rowResolvers = accounts.map(async (address) => {
+      const balance = await web3.eth.getBalance(address);
+      // ethBalance is a BigNumber instance
+      // https://github.com/indutny/bn.js/
+      const ethBalance = web3.utils.fromWei(balance, "ether");
+      const humanFriendlyBalance = parseFloat(ethBalance).toFixed(4);
+      // Fill in the templated row and put in the document
+      const clone = template.content.cloneNode(true);
+      clone.querySelector(".address").textContent = address;
+      clone.querySelector(".balance").textContent = humanFriendlyBalance;
+      accountContainer.appendChild(clone);
+    });
+
+    // Because rendering account does its own RPC commucation
+    // with Ethereum node, we do not want to display any results
+    // until data for all accounts is loaded
+    await Promise.all(rowResolvers);
+
+    // Display fully loaded UI for wallet data
+    document.querySelector("#prepare").style.display = "none";
+    document.querySelector("#connected").style.display = "block";
+  }
+
+  /**
+   * Fetch account data for UI when
+   * - User switches accounts in wallet
+   * - User switches networks in wallet
+   * - User connects wallet initially
+   */
+  async function refreshAccountData () {
+
+    // If any current data is displayed when
+    // the user is switching acounts in the wallet
+    // immediate hide this data
+    document.querySelector("#connected").style.display = "none";
+    document.querySelector("#prepare").style.display = "block";
+
+    // Disable button while UI is loading.
+    // fetchAccountData() will take a while as it communicates
+    // with Ethereum node via JSON-RPC and loads chain data
+    // over an API call.
+    document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+    await fetchAccountData(provider);
+    document.querySelector("#btn-connect").removeAttribute("disabled")
+  }
+
+  /**
+   * Connect wallet button pressed.
+   */
+  async function onConnect () {
+
+    console.log("Opening a dialog", web3Modal);
+    try {
+      provider = await web3Modal.connect();
+    } catch (e) {
+      console.log("Could not get a wallet connection", e);
+      return;
+    }
+
+    // Subscribe to accounts change
+    provider.on("accountsChanged", (accounts) => {
+      fetchAccountData();
+    });
+
+    // Subscribe to chainId change
+    provider.on("chainChanged", (chainId) => {
+      fetchAccountData();
+    });
+
+    // Subscribe to networkId change
+    provider.on("networkChanged", (networkId) => {
+      fetchAccountData();
+    });
+
+    await refreshAccountData();
+  }
+
+  /**
+   * Disconnect wallet button pressed.
+   */
+  async function onDisconnect () {
+
+    console.log("Killing the wallet connection", provider);
+
+    // TODO: Which providers have close method?
+    if (provider.close) {
+      await provider.close();
+
+      // If the cached provider is not cleared,
+      // WalletConnect will default to the existing session
+      // and does not allow to re-scan the QR code with a new wallet.
+      // Depending on your use case you may want or want not his behavir.
+      await web3Modal.clearCachedProvider();
+      provider = null;
+    }
+
+    selectedAccount = null;
+
+    // Set the UI back to the initial state
+    document.querySelector("#prepare").style.display = "block";
+    document.querySelector("#connected").style.display = "none";
+  }
+  /**
+   * onResultClick button pressed.
+   */
+  async function onResultClick () {
+    window.open(resultURL, '_blank').focus();
+  }
+  /**
+   * Buy button pressed.
+   */
+  async function onMint () {
+    document.querySelector("#progress").style.display = "block";
+    document.querySelector("#mint").disabled = true;
+
+    let countDots = 0;
+    let sendOrderStatus = setInterval(async function () {
+      let phrase = "Транзакция обрабатывается " + ".".repeat(countDots);
+      document.querySelector("#progress").textContent = phrase;
+      countDots++;
+      if (countDots === 4) countDots = 0;
+    }, 1000);
+    const web3 = new Web3(provider);
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== 56 && chainId !== 97) {
+        document.querySelector("#progress").textContent = "Мы поддерживаем только сеть Binance Smart Chain mainnet";
+      document.querySelector("#mint").disabled = true;
+      // document.querySelector("#progress").style.display = "none";
+      return;
+    }
+
+    let body = {
+      name:document.querySelector("#name").value,
+      description:document.querySelector("#description").value,
+      image:base64image,
+      properties: {
+          artist:document.querySelector("#artist").value,
+          public_profile_link:document.querySelector("#public_profile_link").value
+      }
+    };
+    // console.log(JSON.stringify(body));
+
+    fetch('https://mac8.cfc.io/api/ipfsForNFT', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+      .then(response => response.text())
+      .then(async data => {
+        console.log(data);
+        if (data.length !== 46) {
+          console.log('wrong data');
+          return;
+        }
+        let link = 'ipfs://' + data;
+
+        let nftAddress = '0xb861DF245fc18483235D9C11b87d8A76F4678e08';
+        if (chainId === 97) nftAddress = "0x873783a6c4586C196adfDb15C8ACdc576B799938";
+        const nftABI = JSON.parse('[{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6c0360eb"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"tokenUri","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd0def521"}]');
+        const nft = new web3.eth.Contract(nftABI, nftAddress);
+
+        let mintNFTResult = await nft.methods.mint(selectedAccount,link).send({
+          from: selectedAccount,
+          gas: 500000
+        }).catch((err) => {
+          console.log('err->' + JSON.stringify(err) );
+          document.querySelector("#progress").textContent = err.message;
+        });
+        if (mintNFTResult !== undefined) {
+          console.log('mintNFTResult:', mintNFTResult.transactionHash);
+          document.querySelector("#mint").disabled = false;
+          document.querySelector("#buy-obs-result").style.display = "inline-block";
+            document.querySelector("#link-to-nft-details").style.display = "inline-block";
+            const tokenId = mintNFTResult.events.Transfer.returnValues.tokenId
+            document.querySelector("#progress").textContent = "Ваш линк для распространения в сетях: https://ru.openbisea.io/detailsnft?tokenID=" + tokenId;
+            console.log('tokenId:', tokenId);
+            nftDetailsURL = "https://ru.openbisea.io/detailsnft?tokenID=" + tokenId;
+
+            resultURL = "https://bscscan.com/tx/" + mintNFTResult.transactionHash
+          if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + mintNFTResult.transactionHash
+          document.querySelector("#progress").style.display = "none";
+        } else {
+          document.querySelector("#progress").style.display = "none";
+        }
+        clearInterval(sendOrderStatus);
+      })
+      .catch(error => {
+        console.error(error)
+      })
+
+  }
+  function getBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  let base64image
+  const handleImageUpload = async event => {
+    const files = event.target.files
+    base64image = await getBase64(files[0]);
+    base64image = base64image.split(',')[1];
+    // console.log('base64image ' + base64image );
+    document.querySelector("#mint").disabled = false;
+    document.querySelector("#imageUpload").textContent = "Картинка загружена";
+  }
+  let base64animation
+
+  const handleAnimationUpload = event => {
+    const files = event.target.files
+    base64animation = files[0].toString('base64')
+    base64animation = base64animation.split(',')[1];
+
+    document.querySelector("#mint").disabled = false;
+    document.querySelector("#animationUpload").textContent = "Видео загружено";
+  }
+  let nftDetailsURL;
+
+  async function onDetailsClick () {
+      window.open(nftDetailsURL, '_blank').focus();
+  }
+
+  /**
+   * Main entry point.
+   */
+  window.addEventListener('load', async () => {
+    init();
+    document.querySelector("#btn-connect").addEventListener("click", onConnect);
+    document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
+    document.querySelector("#mint").addEventListener("click", onMint);
+    // document.querySelector("#amount").addEventListener("input", onAmountChange);
+    document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
+    document.querySelector('#fileImageUpload').addEventListener('change', event => {
+      console.log('fileUpload' )
+      handleImageUpload(event)
+    })
+      document.querySelector("#link-to-nft-details").addEventListener("click", onDetailsClick);
+
+      document.querySelector('#fileAnimationUpload').addEventListener('change', event => {
+      handleAnimationUpload(event)
+    })
+  });
+
+  window.onload = function () {
+    init()
+  }
+</script>
+<script>
+  (function () {
+
+  })();
+</script>

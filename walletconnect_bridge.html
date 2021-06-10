@@ -1,0 +1,751 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<div class="container" style="display: table;margin-right: auto;margin-left: auto;text-align:center;">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Ethereum - Binance Smart chain bridge</h1>
+
+            <div class="alert alert-danger" id="alert-error-https" style="display: none">
+                You can run this example only over HTTPS connection.
+            </div>
+
+            <div id="prepare">
+                <p>No wallet connected. Connect wallet to show accounts and their BNB/ETH balances.</p>
+                <button class="btn btn-primary" id="btn-connect" style="background-color: #fcbd24;color:black">
+                    Connect wallet
+                </button>
+                <br>
+                <br>
+
+            </div>
+
+            <div id="connected" style="display: none; text-align: center;">
+                <h3>Please check if ETH asset contract registered first:</h3>
+
+                <input type="text" placeholder="contract address" name="contract" value="" id="contract" style="border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
+                <br>
+                <br>
+                <input type="number" placeholder="asset type 20 or 721 or 1155" name="type" value="" id="type" style="width:230px;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
+                <br>
+                <br>
+                <button class="btn btn-primary" id="check" onclick="onCheck()" style="background-color: #fcbd24;color:black">
+                    Check
+                </button>
+                <button class="btn btn-primary" id="register" onclick="onRegister()" style="background-color: #fcbd24;color:black">
+                    Register contract
+                </button>
+                <br>
+                <span id="checkres" style="color:#fcbd24;"> Contract not checked in.</span>
+
+                <span style="color:#fcbd24;"> Please choose asset to convert depends from type:</span>
+
+                <input type="number" placeholder="ERC20/ERC1155 amount (1 for ERC721)" name="amount" value="" id="amount" style="width:230px;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
+                <br>
+                <br>
+
+                <input type="number" placeholder="ERC721/ERC1155 tokenID" name="tokenID" value="" id="tokenID" style="width:230px;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
+                <br>
+                <br>
+                <hr>
+
+                <h3>Convert from Ethereum to Binance Smart Chain:</h3>
+                <button class="btn btn-primary" id="approve" style="background-color: #fcbd24;color:black"> Approve ETH </button>
+                <button class="btn btn-primary" id="convert" style="background-color: #fcbd24;color:black"> Convert ETH </button>
+                <br>
+                <hr>
+
+                <h3>Convert back from Binance Smart Chain to Ethereum</h3>
+                <button class="btn btn-primary" id="approveBSC" style="background-color: #fcbd24;color:black"> Approve BSC </button>
+                <button class="btn btn-primary" id="convertBSC" style="background-color: #fcbd24;color:black"> Convert BSC </button>
+                <span id="progress" style="color:#fcbd24;display: none;"> Transaction in progress ...</span>
+
+                <br>
+                <div id="resultstrans" style="text-align: center;">
+                    <button class="btn btn-primary" id="buy-obs-result" style="display: none;background-color: white;color:black;" > Check transaction status </button>
+                </div>
+
+                <hr>
+
+                <div id="network">
+                    <p>
+                        <strong>Connected blockchain:</strong> <span id="network-name"></span>
+                    </p>
+
+                    <p>
+                        <strong>Selected account:</strong> <span id="selected-account"></span>
+                    </p>
+                    <button class="btn btn-primary" id="btn-disconnect" style="background-color: #fcbd24;color:black">
+                        Disconnect wallet
+                    </button>
+
+                </div>
+
+
+                <h3>All account balances</h3>
+
+                <table class="table table-listing">
+                    <thead>
+                    <th>Address</th>
+                    <th>BNB/ETH balance</th>
+                    </thead>
+
+                    <tbody id="accounts">
+                    </tbody>
+                </table>
+
+                <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- We use simple <template> templating for the example -->
+    <div id="templates" style="display: none">
+        <template id="template-balance">
+            <tr>
+                <th class="address"></th>
+                <td class="balance"></td>
+            </tr>
+        </template>
+    </div>
+</div>
+
+<!--
+  Use unpkg CDN to load all NPM packages to vanilla Javascript - read more at http://unpkg.com
+  On your deployment, you properly either want to use a preprocessing tool like webpack
+  to include these files, or extract NPM archives and manually host the files inside.
+  TODO: Pin down all versions.
+-->
+
+<script type="text/javascript" src="https://unpkg.com/web3@1.2.11/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/web3modal@1.9.0/dist/index.js"></script>
+<script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+
+<script>
+    "use strict";
+
+    /**
+     * Example JavaScript code that interacts with the page and Web3 wallets
+     */
+    function getQueryParams(qs) {
+        qs = qs.split('+').join(' ');
+
+        var params = {},
+            tokens,
+            re = /[?&]?([^=]+)=([^&]*)/g;
+
+        while (tokens = re.exec(qs)) {
+            params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+        }
+
+        return params;
+    }
+    // Unpkg imports
+    const Web3Modal = window.Web3Modal.default;
+    const WalletConnectProvider = window.WalletConnectProvider.default;
+    const Fortmatic = window.Fortmatic;
+    const evmChains = window.evmChains;
+
+    // Web3modal instance
+    let web3Modal
+
+    // Chosen wallet provider given by the dialog window
+    let provider;
+
+    // Address of the selected account
+    let selectedAccount;
+
+    //bscan
+    let resultURL;
+    /**
+     * Setup the orchestra
+     */
+    function init () {
+
+        console.log("Initializing example");
+        console.log("WalletConnectProvider is", WalletConnectProvider);
+        console.log("Fortmatic is", Fortmatic);
+        console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
+
+        // Check that the web page is run in a secure context,
+        // as otherwise MetaMask won't be available
+        if (location.protocol !== 'https:') {
+            // https://ethereum.stackexchange.com/a/62217/620
+            const alert = document.querySelector("#alert-error-https");
+            alert.style.display = "block";
+            document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+            return;
+        }
+
+        let query = getQueryParams(document.location.search);
+        if (query !== undefined && query.tokenID !== undefined) {
+            document.querySelector("#tokenID").value = query.tokenID;
+        }
+        // Tell Web3modal what providers we have available.
+        // Built-in web browser provider (only one can exist as a time)
+        // like MetaMask, Brave or Opera is added automatically by Web3modal
+        const providerOptions = {
+            walletconnect: {
+                package: WalletConnectProvider,
+                options: {
+                    // Mikko's test key - don't copy as your mileage may vary
+                    infuraId: "bb7b522604e54a2f8ad251e7417b2355",
+                }
+            },
+
+            // fortmatic: {
+            //   package: Fortmatic,
+            //   options: {
+            //     // Mikko's TESTNET api key
+            //     key: "pk_test_391E26A3B43A3350"
+            //   }
+            // }
+        };
+
+        web3Modal = new Web3Modal({
+            cacheProvider: false, // optional
+            providerOptions, // required
+            disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
+        });
+
+        console.log("Web3Modal instance is", web3Modal);
+    }
+
+    /**
+     * Kick in the UI action after Web3modal dialog has chosen a provider
+     */
+    async function fetchAccountData () {
+
+        // Get a Web3 instance for the wallet
+        const web3 = new Web3(provider);
+
+        console.log("Web3 instance is", web3);
+
+        // Get connected chain id from Ethereum node
+        const chainId = await web3.eth.getChainId();
+        // Load chain information over an HTTP API
+        const chainData = evmChains.getChain(chainId);
+        document.querySelector("#network-name").textContent = chainData.name;
+
+        // Get list of accounts of the connected wallet
+        const accounts = await web3.eth.getAccounts();
+
+        // MetaMask does not give you all accounts, only the selected account
+        console.log("Got accounts", accounts);
+        selectedAccount = accounts[0];
+
+        document.querySelector("#selected-account").textContent = selectedAccount;
+
+        // Get a handl
+        const template = document.querySelector("#template-balance");
+        const accountContainer = document.querySelector("#accounts");
+
+        // Purge UI elements any previously loaded accounts
+        accountContainer.innerHTML = '';
+
+        // Go through all accounts and get their ETH balance
+        const rowResolvers = accounts.map(async (address) => {
+            const balance = await web3.eth.getBalance(address);
+            // ethBalance is a BigNumber instance
+            // https://github.com/indutny/bn.js/
+            const ethBalance = web3.utils.fromWei(balance, "ether");
+            const humanFriendlyBalance = parseFloat(ethBalance).toFixed(4);
+            // Fill in the templated row and put in the document
+            const clone = template.content.cloneNode(true);
+            clone.querySelector(".address").textContent = address;
+            clone.querySelector(".balance").textContent = humanFriendlyBalance;
+            accountContainer.appendChild(clone);
+        });
+
+        // Because rendering account does its own RPC commucation
+        // with Ethereum node, we do not want to display any results
+        // until data for all accounts is loaded
+        await Promise.all(rowResolvers);
+
+        // Display fully loaded UI for wallet data
+        document.querySelector("#prepare").style.display = "none";
+        document.querySelector("#connected").style.display = "block";
+    }
+
+    /**
+     * Fetch account data for UI when
+     * - User switches accounts in wallet
+     * - User switches networks in wallet
+     * - User connects wallet initially
+     */
+    async function refreshAccountData () {
+
+        // If any current data is displayed when
+        // the user is switching acounts in the wallet
+        // immediate hide this data
+        document.querySelector("#connected").style.display = "none";
+        document.querySelector("#prepare").style.display = "block";
+
+        // Disable button while UI is loading.
+        // fetchAccountData() will take a while as it communicates
+        // with Ethereum node via JSON-RPC and loads chain data
+        // over an API call.
+        document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+        await fetchAccountData(provider);
+        document.querySelector("#btn-connect").removeAttribute("disabled")
+    }
+
+    /**
+     * Connect wallet button pressed.
+     */
+    async function onConnect () {
+
+        console.log("Opening a dialog", web3Modal);
+        try {
+            provider = await web3Modal.connect();
+        } catch (e) {
+            console.log("Could not get a wallet connection", e);
+            return;
+        }
+
+        // Subscribe to accounts change
+        provider.on("accountsChanged", (accounts) => {
+            fetchAccountData();
+        });
+
+        // Subscribe to chainId change
+        provider.on("chainChanged", (chainId) => {
+            fetchAccountData();
+        });
+
+        // Subscribe to networkId change
+        provider.on("networkChanged", (networkId) => {
+            fetchAccountData();
+        });
+
+        await refreshAccountData();
+    }
+
+    /**
+     * Disconnect wallet button pressed.
+     */
+    async function onDisconnect () {
+
+        console.log("Killing the wallet connection", provider);
+
+        // TODO: Which providers have close method?
+        if (provider.close) {
+            await provider.close();
+
+            // If the cached provider is not cleared,
+            // WalletConnect will default to the existing session
+            // and does not allow to re-scan the QR code with a new wallet.
+            // Depending on your use case you may want or want not his behavir.
+            await web3Modal.clearCachedProvider();
+            provider = null;
+        }
+
+        selectedAccount = null;
+
+        // Set the UI back to the initial state
+        document.querySelector("#prepare").style.display = "block";
+        document.querySelector("#connected").style.display = "none";
+    }
+    /**
+     * onResultClick button pressed.
+     */
+    async function onResultClick () {
+        window.open(resultURL, '_blank').focus();
+    }
+    async function onApprove (isBSC) {
+        console.log('onApprove->' + isBSC);
+
+        document.querySelector("#progress").style.display = "block";
+        document.querySelector("#approve").disabled = true;
+
+        let countDots = 0;
+        let sendOrderStatus = setInterval(async function () {
+            let phrase = "Transaction in progress " + ".".repeat(countDots);
+            document.querySelector("#progress").textContent = phrase;
+            countDots++;
+            if (countDots === 4) countDots = 0;
+        }, 1000);
+        const web3 = new Web3(provider);
+        const chainId = await web3.eth.getChainId();
+        if (isBSC === false && chainId !== 1 && chainId !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "We support only ETH mainnet";
+            document.querySelector("#approve").disabled = false;
+            return;
+        }
+        if (isBSC === true && chainId !== 56 && chainId !== 97) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "We support only BSC mainnet";
+            document.querySelector("#approve").disabled = false;
+            return;
+        }
+
+        const contract = document.querySelector("#contract").value;
+        if (contract === undefined  || contract.length !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "Wrong contract length";
+            document.querySelector("#approve").disabled = false;
+            return;
+        }
+        const type = parseInt(document.querySelector("#type").value);
+        let amount = parseFloat(document.querySelector("#amount").value);
+        if (amount.length === 0 || isNaN(amount)) amount = 1;
+        const tokenID = parseInt(document.querySelector("#tokenID").value);
+
+        if (type !== 20 && isNaN(tokenID)) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "TokenID must specified for ERC721/ERC1155 ";
+            document.querySelector("#approve").disabled = false;
+            return;
+        }
+
+        let ethAddress = '0x0440e9FA9C4c4C2B60A8942c64a870b9cd8e03FE';
+        if (chainId === 42) ethAddress = "0xa47d25C2fa71f6e4790A3F3C6290ba14672f43F5";
+
+        let bscAddress = '0xEEE87Dad2A6Ba15c301e3f6bc2bfB0ac1051EeA9';
+        if (chainId === 97) bscAddress = "0x9d46937dDec8f9cEF796C1f30c1D92a4d1da18D6";
+
+        let method;
+        let contractObj;
+        let contractAddress = contract;
+        let addressForApproval = ethAddress;
+        if (isBSC === true) {
+            const bscAbi = JSON.parse('[{"inputs":[{"internalType":"address","name":"bep20Impl","type":"address"},{"internalType":"uint256","name":"fee","type":"uint256"},{"internalType":"address","name":"bep20ProxyAdminAddr","type":"address"},{"internalType":"address","name":"erc721Impl","type":"address"},{"internalType":"uint256","name":"fee721","type":"uint256"},{"internalType":"address","name":"erc721ProxyAdminAddr","type":"address"},{"internalType":"address","name":"erc1155Impl","type":"address"},{"internalType":"uint256","name":"fee1155","type":"uint256"},{"internalType":"address","name":"erc1155ProxyAdminAddr","type":"address"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep1155Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Swap1155Filled","type":"event","signature":"0x3656b6ae101e5a48382e246af477ac87f2e485a3beb4df5e4f1613a3c5b70303"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap1155Started","type":"event","signature":"0x1036aa5f58d80d7f7b8dd12ada9f74506ed8e12ee0053e53f0b61972bcc981c7"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep721Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Swap721Filled","type":"event","signature":"0xdcf4a9a6cf1fd8be24480de01b10dd08e20e6a2e50bee21faefe2311de2bc58e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap721Started","type":"event","signature":"0xdd8c17ff964c6528e94cefcba62cee301ea5b2cc5218f2a93e939e546c1b54a7"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep20Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SwapFilled","type":"event","signature":"0x3bebd9a738291e69898b5dbfadb6329b4b09fc648bdef68762928e521463abd9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"ethRegisterTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"bep1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":false,"internalType":"string","name":"uri","type":"string"}],"name":"SwapPair1155Created","type":"event","signature":"0x7f526265d038a88d8af434336358e2e8ebe634c6ed6d84da4d531b4c2f214ff9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"ethRegisterTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"bep721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"baseTokenURI","type":"string"}],"name":"SwapPair721Created","type":"event","signature":"0x42db815f9d474fb2c517f165903cec11218a98d583f03930461e1f44ce3dc1f3"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"ethRegisterTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"bep20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"uint8","name":"decimals","type":"uint8"}],"name":"SwapPairCreated","type":"event","signature":"0xcc0314763eabceb74cd3d30ae785c09bfe4e204af2088b3bfcdbbe5082133db5"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"SwapStarted","type":"event","signature":"0x49c08ff11118922c1e8298915531eff9ef6f8b39b44b3e9952b75d47e1d0cdd0"},{"inputs":[],"name":"bep20Implementation","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x66fec65c"},{"inputs":[],"name":"bep20ProxyAdmin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0344165a"},{"inputs":[],"name":"erc1155Implementation","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6e204c41"},{"inputs":[],"name":"erc1155ProxyAdmin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3f7dffdc"},{"inputs":[],"name":"erc721Implementation","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4a80a319"},{"inputs":[],"name":"erc721ProxyAdmin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0b9edecc"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"filledETHTx","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4e2dc7f1"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[],"name":"swap1155Fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x90f1adca"},{"inputs":[],"name":"swap721Fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3ccb5bfc"},{"inputs":[],"name":"swapFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x54cf2aeb"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"swapMappingBSC2ETH","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xbe0ace69"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"swapMappingETH2BSC","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x60b810f1"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address payable","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"name":"setSwapFee","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x34e19907"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"},{"internalType":"uint8","name":"decimals","type":"uint8"}],"name":"createSwapPair","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"nonpayable","type":"function","signature":"0x32bd6e31"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"name":"createSwapPair721","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"nonpayable","type":"function","signature":"0x9c1e5828"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"string","name":"uri","type":"string"}],"name":"createSwapPair1155","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"nonpayable","type":"function","signature":"0x3a025b49"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fillETH2BSCSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0xe307b931"},{"inputs":[{"internalType":"address","name":"bep20Addr","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swapBSC2ETH","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x1ba3b150"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"string","name":"tokenURI","type":"string"}],"name":"fill721ETH2BSCSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x6ec2643d"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fill1155ETH2BSCSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x4516ebe2"},{"inputs":[{"internalType":"address","name":"bep721Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"swap721BSC2ETH","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xdac3e1ab"},{"inputs":[{"internalType":"address","name":"bep1155Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swap1155BSC2ETH","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xc5454c3e"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"onERC721Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0x150b7a02"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xf23a6e61"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155BatchReceived","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xbc197c81"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"}]')
+            const bsc = new web3.eth.Contract(bscAbi, bscAddress);
+            contractAddress = await bsc.methods.swapMappingETH2BSC(contract).call();
+            addressForApproval = bscAddress;
+        }
+        console.log('contract->' + contract);
+        console.log('contractAddress->' + contractAddress);
+        console.log('amount->' + amount);
+        console.log('addressForApproval->' + addressForApproval);
+        console.log('tokenID->' + tokenID);
+
+        if (type === 20) {
+            const erc20 = JSON.parse('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"inputs":[],"name":"_decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x32424aa3"},{"inputs":[],"name":"_name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xd28d8852"},{"inputs":[],"name":"_symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xb09f1266"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[],"name":"getOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x893d20e8"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x313ce567"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0xa9059cbb"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xdd62ed3e"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x39509351"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0xa457c2d7"}]');
+            contractObj = new web3.eth.Contract(erc20, contractAddress);
+            method = contractObj.methods.approve(addressForApproval,amount + "");
+        } else if (type === 721) {
+            const erc721abi = JSON.parse('[{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"}],"name":"TeamAdded","type":"event","signature":"0x3f5f1db80208f0d453083a86e16909cecc1e95e2618d5d927c93ace22b8200fc"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"}],"name":"TeamRemoved","type":"event","signature":"0x26b6063d78aefcf96f02ff06bc9822b5a623278253add7fffa5fb453db399810"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"addTeam","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb463a75c"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6c0360eb"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[],"name":"getTeamAddresses","outputs":[{"internalType":"address[]","name":"","type":"address[]"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x89e52771"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"isTeam","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x24851914"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"renounceTeam","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd9a431b3"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x6a627842"}]');
+            contractObj = new web3.eth.Contract(erc721abi, contractAddress);
+            method = contractObj.methods.approve(addressForApproval,tokenID + "");
+        } else if (type === 1155) {
+            const erc1155 = JSON.parse('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"values","type":"uint256[]"}],"name":"TransferBatch","type":"event","signature":"0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"TransferSingle","type":"event","signature":"0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"value","type":"string"},{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"}],"name":"URI","type":"event","signature":"0x6bb7ff708619ba0610cba295a58592e0451dee2622938c8755667688daf3529b"},{"inputs":[],"name":"BRONZE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe00fd543"},{"inputs":[],"name":"GOLD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3e4bee38"},{"inputs":[],"name":"SILVER","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe3e55f08"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x00fdd58e"},{"inputs":[{"internalType":"address[]","name":"accounts","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4e1273f4"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeBatchTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x2eb2c2d6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf242432a"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"uri","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0e89341c"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x731133e9"}]');
+            contractObj = new web3.eth.Contract(erc1155, contractAddress);
+            method = contractObj.methods.setApprovalForAll(addressForApproval);
+        }
+
+        console.log('contractObj->' + contractObj);
+        console.log('method->' + method);
+        let contractApproveResult = await method.send({
+            from: selectedAccount,
+            gas: 500000
+        }).catch((err) => {
+            console.log('err->' + JSON.stringify(err) );
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = err.message;
+        });
+        if (contractApproveResult !== undefined) {
+            console.log('contractRegisterResult:', contractApproveResult.transactionHash);
+            document.querySelector("#approve").disabled = false;
+            document.querySelector("#buy-obs-result").style.display = "inline-block";
+            if (isBSC === true) {
+                resultURL = "https://bscscan.com/tx/" + contractApproveResult.transactionHash
+                if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + contractApproveResult.transactionHash
+            } else {
+                resultURL = "https://etherscan.io/tx/" + contractApproveResult.transactionHash
+                if (chainId === 42) resultURL = "http://kovan.etherscan.io/tx/" + contractApproveResult.transactionHash
+            }
+
+            document.querySelector("#progress").style.display = "none";
+        } else {
+            // document.querySelector("#obsamount").textContent = "Result undefined";
+            document.querySelector("#progress").style.display = "none";
+        }
+        clearInterval(sendOrderStatus);
+    }
+
+    async function onConvert (isBSC) {
+        document.querySelector("#progress").style.display = "block";
+        document.querySelector("#convert").disabled = true;
+
+        let countDots = 0;
+        let sendOrderStatus = setInterval(async function () {
+            let phrase = "Transaction in progress " + ".".repeat(countDots);
+            document.querySelector("#progress").textContent = phrase;
+            countDots++;
+            if (countDots === 4) countDots = 0;
+        }, 1000);
+        const web3 = new Web3(provider);
+        const chainId = await web3.eth.getChainId();
+        if (isBSC === false && chainId !== 1 && chainId !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "We support only ETH mainnet";
+            document.querySelector("#convert").disabled = false;
+            return;
+        }
+        if (isBSC === true && chainId !== 56 && chainId !== 97) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "We support only BSC mainnet";
+            document.querySelector("#convert").disabled = false;
+            return;
+        }
+
+
+        let ethAddress = '0x0440e9FA9C4c4C2B60A8942c64a870b9cd8e03FE';
+        if (chainId === 42) ethAddress = "0xa47d25C2fa71f6e4790A3F3C6290ba14672f43F5";
+
+        const type = parseInt(document.querySelector("#type").value);
+
+        const contract = document.querySelector("#contract").value;
+        if (contract === undefined  || contract.length !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "Wrong contract length";
+            document.querySelector("#convert").disabled = false;
+            return;
+        }
+
+        const amount = parseFloat(document.querySelector("#amount").value);
+        const tokenID = parseFloat(document.querySelector("#tokenID").value);
+        if (type !== 20 && isNaN(tokenID)) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "TokenID must specified for ERC721/ERC1155 ";
+            document.querySelector("#convert").disabled = false;
+            return;
+        }
+
+        let method;
+        let swapFee;
+
+        if (isBSC === false) {
+            const ethABI = JSON.parse('[{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Swap1155Filled","type":"event","signature":"0x3656b6ae101e5a48382e246af477ac87f2e485a3beb4df5e4f1613a3c5b70303"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap1155Started","type":"event","signature":"0x8d122de08ad2d600423d7dc7dc12914c74797db61cdb3ffbd6116f9004f0af6a"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Swap721Filled","type":"event","signature":"0xdcf4a9a6cf1fd8be24480de01b10dd08e20e6a2e50bee21faefe2311de2bc58e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap721Started","type":"event","signature":"0xc09139a196eea1a99da5f09e3016893e60c2b6aabe784942df8233a5157ab01e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SwapFilled","type":"event","signature":"0x3bebd9a738291e69898b5dbfadb6329b4b09fc648bdef68762928e521463abd9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":false,"internalType":"string","name":"uri","type":"string"}],"name":"SwapPair1155Register","type":"event","signature":"0xfd26c04769f9fda184e877277305184bcddd883c217f94c9eeee3dd5041f7a79"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"string","name":"baseURI","type":"string"}],"name":"SwapPair721Register","type":"event","signature":"0x1a7c9a5fa5d51a321bc7df01f4a8bd15302e6a5e7dfb8f48e35ea8cf655f7629"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"uint8","name":"decimals","type":"uint8"}],"name":"SwapPairRegister","type":"event","signature":"0xfe3bd005e346323fa452df8cafc28c55b99e3766ba8750571d139c6cf5bc08a0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"SwapStarted","type":"event","signature":"0xf60309f865a6aa297da5fac6188136a02e5acfdf6e8f6d35257a9f4e9653170f"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"filledBSCTx","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x50877c77"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"registeredERC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xee514bc3"},{"inputs":[],"name":"swapFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x54cf2aeb"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address payable","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"name":"setSwapFee","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x34e19907"},{"inputs":[{"internalType":"address","name":"erc1155Addr","type":"address"}],"name":"register1155SwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x841af51f"},{"inputs":[{"internalType":"address","name":"erc721Addr","type":"address"}],"name":"register721SwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x03db8c72"},{"inputs":[{"internalType":"address","name":"erc20Addr","type":"address"}],"name":"registerSwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x5c13c151"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fillBSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x9867df11"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"fill721BSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x279b4568"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fill1155BSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x790486ae"},{"inputs":[{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swapETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xb9927a9c"},{"inputs":[{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"swap721ETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x08b3def6"},{"inputs":[{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swap1155ETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x4977937a"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"onERC721Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0x150b7a02"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xf23a6e61"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155BatchReceived","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xbc197c81"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"}]')
+            const eth = new web3.eth.Contract(ethABI, ethAddress);
+
+            if (type === 20) {
+                method = eth.methods.swapETH2BSC(contract,amount + "");
+            } else if (type === 721) {
+                method = eth.methods.swap721ETH2BSC(contract,tokenID + "");
+            } else if (type === 1155) {
+                method = eth.methods.swap1155ETH2BSC(contract,tokenID + "",amount + "");
+            }
+            swapFee = await eth.methods.swapFee().call();
+        }
+        if (isBSC === true) {
+            let bscAddress = '0xEEE87Dad2A6Ba15c301e3f6bc2bfB0ac1051EeA9';
+            if (chainId === 97) bscAddress = "0x9d46937dDec8f9cEF796C1f30c1D92a4d1da18D6";
+            const bscAbi = JSON.parse('[{"inputs":[{"internalType":"address","name":"bep20Impl","type":"address"},{"internalType":"uint256","name":"fee","type":"uint256"},{"internalType":"address","name":"bep20ProxyAdminAddr","type":"address"},{"internalType":"address","name":"erc721Impl","type":"address"},{"internalType":"uint256","name":"fee721","type":"uint256"},{"internalType":"address","name":"erc721ProxyAdminAddr","type":"address"},{"internalType":"address","name":"erc1155Impl","type":"address"},{"internalType":"uint256","name":"fee1155","type":"uint256"},{"internalType":"address","name":"erc1155ProxyAdminAddr","type":"address"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep1155Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Swap1155Filled","type":"event","signature":"0x3656b6ae101e5a48382e246af477ac87f2e485a3beb4df5e4f1613a3c5b70303"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap1155Started","type":"event","signature":"0x1036aa5f58d80d7f7b8dd12ada9f74506ed8e12ee0053e53f0b61972bcc981c7"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep721Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Swap721Filled","type":"event","signature":"0xdcf4a9a6cf1fd8be24480de01b10dd08e20e6a2e50bee21faefe2311de2bc58e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap721Started","type":"event","signature":"0xdd8c17ff964c6528e94cefcba62cee301ea5b2cc5218f2a93e939e546c1b54a7"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep20Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SwapFilled","type":"event","signature":"0x3bebd9a738291e69898b5dbfadb6329b4b09fc648bdef68762928e521463abd9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"ethRegisterTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"bep1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":false,"internalType":"string","name":"uri","type":"string"}],"name":"SwapPair1155Created","type":"event","signature":"0x7f526265d038a88d8af434336358e2e8ebe634c6ed6d84da4d531b4c2f214ff9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"ethRegisterTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"bep721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"baseTokenURI","type":"string"}],"name":"SwapPair721Created","type":"event","signature":"0x42db815f9d474fb2c517f165903cec11218a98d583f03930461e1f44ce3dc1f3"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"ethRegisterTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"bep20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"uint8","name":"decimals","type":"uint8"}],"name":"SwapPairCreated","type":"event","signature":"0xcc0314763eabceb74cd3d30ae785c09bfe4e204af2088b3bfcdbbe5082133db5"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"bep20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"SwapStarted","type":"event","signature":"0x49c08ff11118922c1e8298915531eff9ef6f8b39b44b3e9952b75d47e1d0cdd0"},{"inputs":[],"name":"bep20Implementation","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x66fec65c"},{"inputs":[],"name":"bep20ProxyAdmin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0344165a"},{"inputs":[],"name":"erc1155Implementation","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6e204c41"},{"inputs":[],"name":"erc1155ProxyAdmin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3f7dffdc"},{"inputs":[],"name":"erc721Implementation","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4a80a319"},{"inputs":[],"name":"erc721ProxyAdmin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0b9edecc"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"filledETHTx","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4e2dc7f1"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[],"name":"swap1155Fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x90f1adca"},{"inputs":[],"name":"swap721Fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3ccb5bfc"},{"inputs":[],"name":"swapFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x54cf2aeb"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"swapMappingBSC2ETH","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xbe0ace69"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"swapMappingETH2BSC","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x60b810f1"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address payable","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"name":"setSwapFee","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x34e19907"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"},{"internalType":"uint8","name":"decimals","type":"uint8"}],"name":"createSwapPair","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"nonpayable","type":"function","signature":"0x32bd6e31"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"name":"createSwapPair721","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"nonpayable","type":"function","signature":"0x9c1e5828"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"string","name":"uri","type":"string"}],"name":"createSwapPair1155","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"nonpayable","type":"function","signature":"0x3a025b49"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fillETH2BSCSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0xe307b931"},{"inputs":[{"internalType":"address","name":"bep20Addr","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swapBSC2ETH","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x1ba3b150"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"string","name":"tokenURI","type":"string"}],"name":"fill721ETH2BSCSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x6ec2643d"},{"inputs":[{"internalType":"bytes32","name":"ethTxHash","type":"bytes32"},{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fill1155ETH2BSCSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x4516ebe2"},{"inputs":[{"internalType":"address","name":"bep721Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"swap721BSC2ETH","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xdac3e1ab"},{"inputs":[{"internalType":"address","name":"bep1155Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swap1155BSC2ETH","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xc5454c3e"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"onERC721Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0x150b7a02"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xf23a6e61"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155BatchReceived","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xbc197c81"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"}]')
+            const bsc = new web3.eth.Contract(bscAbi, bscAddress);
+            let contractAddress = await bsc.methods.swapMappingETH2BSC(contract).call();
+
+            if (type === 20) {
+                method = bsc.methods.swapBSC2ETH(contractAddress,amount + "");
+            } else if (type === 721) {
+                method = bsc.methods.swap721BSC2ETH(contractAddress,tokenID + "");
+            } else if (type === 1155) {
+                method = bsc.methods.swap1155BSC2ETH(contractAddress,tokenID + "",amount + "");
+            }
+            swapFee = await bsc.methods.swapFee().call();
+        }
+
+        if (method === undefined) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "Please choose correct asset type on ETH. 20 for ERC20, 721 for ERC721, 1155 for ERC1155";
+            document.querySelector("#convert").disabled = false;
+            return;
+        }
+        console.log('type->' + type);
+
+        console.log('method->' + method);
+        console.log('swapFee->' + swapFee);
+
+        let contractConvertResult = await method.send({
+            from: selectedAccount,
+            gas: 500000,
+            value: swapFee
+        }).catch((err) => {
+            console.log('err->' + JSON.stringify(err) );
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = err.message;
+        });
+        if (contractConvertResult !== undefined) {
+            console.log('contractRegisterResult:', contractConvertResult.transactionHash);
+            document.querySelector("#convert").disabled = false;
+            document.querySelector("#buy-obs-result").style.display = "inline-block";
+            if (isBSC === true) {
+                resultURL = "https://bscscan.com/tx/" + contractConvertResult.transactionHash
+                if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + contractConvertResult.transactionHash
+            } else {
+                resultURL = "https://etherscan.io/tx/" + contractConvertResult.transactionHash
+                if (chainId === 42) resultURL = "http://kovan.etherscan.io/tx/" + contractConvertResult.transactionHash
+            }
+            document.querySelector("#progress").style.display = "none";
+        } else {
+            // document.querySelector("#obsamount").textContent = "Result undefined";
+            document.querySelector("#progress").style.display = "none";
+        }
+        clearInterval(sendOrderStatus);
+    }
+    async function onCheck () {
+        // document.querySelector("#progress").style.display = "block";
+        document.querySelector("#check").disabled = true;
+
+        let countDots = 0;
+        let sendOrderStatus = setInterval(async function () {
+            let phrase = "Checking in progress " + ".".repeat(countDots);
+            document.querySelector("#checkres").textContent = phrase;
+            countDots++;
+            if (countDots === 4) countDots = 0;
+        }, 1000);
+        const web3 = new Web3(provider);
+        const chainId = await web3.eth.getChainId();
+        if (chainId !== 1 && chainId !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "We support only ETH mainnet";
+            document.querySelector("#register").disabled = false;
+            return;
+        }
+        const contract = document.querySelector("#contract").value;
+        if (contract === undefined  || contract.length !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "Wrong contract length";
+            document.querySelector("#check").disabled = false;
+            return;
+        }
+
+        let ethAddress = '0x0440e9FA9C4c4C2B60A8942c64a870b9cd8e03FE';
+        if (chainId === 42) ethAddress = "0xa47d25C2fa71f6e4790A3F3C6290ba14672f43F5";
+        const ethABI = JSON.parse('[{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Swap1155Filled","type":"event","signature":"0x3656b6ae101e5a48382e246af477ac87f2e485a3beb4df5e4f1613a3c5b70303"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap1155Started","type":"event","signature":"0x8d122de08ad2d600423d7dc7dc12914c74797db61cdb3ffbd6116f9004f0af6a"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Swap721Filled","type":"event","signature":"0xdcf4a9a6cf1fd8be24480de01b10dd08e20e6a2e50bee21faefe2311de2bc58e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap721Started","type":"event","signature":"0xc09139a196eea1a99da5f09e3016893e60c2b6aabe784942df8233a5157ab01e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SwapFilled","type":"event","signature":"0x3bebd9a738291e69898b5dbfadb6329b4b09fc648bdef68762928e521463abd9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":false,"internalType":"string","name":"uri","type":"string"}],"name":"SwapPair1155Register","type":"event","signature":"0xfd26c04769f9fda184e877277305184bcddd883c217f94c9eeee3dd5041f7a79"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"string","name":"baseURI","type":"string"}],"name":"SwapPair721Register","type":"event","signature":"0x1a7c9a5fa5d51a321bc7df01f4a8bd15302e6a5e7dfb8f48e35ea8cf655f7629"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"uint8","name":"decimals","type":"uint8"}],"name":"SwapPairRegister","type":"event","signature":"0xfe3bd005e346323fa452df8cafc28c55b99e3766ba8750571d139c6cf5bc08a0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"SwapStarted","type":"event","signature":"0xf60309f865a6aa297da5fac6188136a02e5acfdf6e8f6d35257a9f4e9653170f"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"filledBSCTx","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x50877c77"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"registeredERC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xee514bc3"},{"inputs":[],"name":"swapFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x54cf2aeb"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address payable","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"name":"setSwapFee","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x34e19907"},{"inputs":[{"internalType":"address","name":"erc1155Addr","type":"address"}],"name":"register1155SwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x841af51f"},{"inputs":[{"internalType":"address","name":"erc721Addr","type":"address"}],"name":"register721SwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x03db8c72"},{"inputs":[{"internalType":"address","name":"erc20Addr","type":"address"}],"name":"registerSwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x5c13c151"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fillBSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x9867df11"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"fill721BSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x279b4568"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fill1155BSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x790486ae"},{"inputs":[{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swapETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xb9927a9c"},{"inputs":[{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"swap721ETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x08b3def6"},{"inputs":[{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swap1155ETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x4977937a"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"onERC721Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0x150b7a02"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xf23a6e61"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155BatchReceived","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xbc197c81"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"}]')
+        const eth = new web3.eth.Contract(ethABI, ethAddress);
+        let contractCheckingResult = await eth.methods.registeredERC(contract).call();
+        console.log('contract->' + contract);
+        console.log('contractRegisterResult->' + contractCheckingResult);
+        clearInterval(sendOrderStatus);
+
+        if (contractCheckingResult === false) {
+            document.querySelector("#checkres").textContent = "Contract not registered, register it first.";
+        }
+        if (contractCheckingResult === true) {
+            document.querySelector("#checkres").textContent = "Contract registered, you can swap assets.";
+        }
+        document.querySelector("#check").disabled = false;
+        clearInterval(sendOrderStatus);
+
+    }
+    async function onRegister () {
+        document.querySelector("#progress").style.display = "block";
+        document.querySelector("#register").disabled = true;
+
+        let countDots = 0;
+        let sendOrderStatus = setInterval(async function () {
+            let phrase = "Transaction in progress " + ".".repeat(countDots);
+            document.querySelector("#progress").textContent = phrase;
+            countDots++;
+            if (countDots === 4) countDots = 0;
+        }, 1000);
+        const web3 = new Web3(provider);
+        const chainId = await web3.eth.getChainId();
+        if (chainId !== 1 && chainId !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "We support only ETH mainnet";
+            document.querySelector("#register").disabled = false;
+            return;
+        }
+
+        let ethAddress = '0x0440e9FA9C4c4C2B60A8942c64a870b9cd8e03FE';
+        if (chainId === 42) ethAddress = "0xa47d25C2fa71f6e4790A3F3C6290ba14672f43F5";
+        const ethABI = JSON.parse('[{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Swap1155Filled","type":"event","signature":"0x3656b6ae101e5a48382e246af477ac87f2e485a3beb4df5e4f1613a3c5b70303"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap1155Started","type":"event","signature":"0x8d122de08ad2d600423d7dc7dc12914c74797db61cdb3ffbd6116f9004f0af6a"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Swap721Filled","type":"event","signature":"0xdcf4a9a6cf1fd8be24480de01b10dd08e20e6a2e50bee21faefe2311de2bc58e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"Swap721Started","type":"event","signature":"0xc09139a196eea1a99da5f09e3016893e60c2b6aabe784942df8233a5157ab01e"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"indexed":true,"internalType":"address","name":"toAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SwapFilled","type":"event","signature":"0x3bebd9a738291e69898b5dbfadb6329b4b09fc648bdef68762928e521463abd9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc1155Addr","type":"address"},{"indexed":false,"internalType":"string","name":"uri","type":"string"}],"name":"SwapPair1155Register","type":"event","signature":"0xfd26c04769f9fda184e877277305184bcddd883c217f94c9eeee3dd5041f7a79"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc721Addr","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"string","name":"baseURI","type":"string"}],"name":"SwapPair721Register","type":"event","signature":"0x1a7c9a5fa5d51a321bc7df01f4a8bd15302e6a5e7dfb8f48e35ea8cf655f7629"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sponsor","type":"address"},{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"},{"indexed":false,"internalType":"uint8","name":"decimals","type":"uint8"}],"name":"SwapPairRegister","type":"event","signature":"0xfe3bd005e346323fa452df8cafc28c55b99e3766ba8750571d139c6cf5bc08a0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"erc20Addr","type":"address"},{"indexed":true,"internalType":"address","name":"fromAddr","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"feeAmount","type":"uint256"}],"name":"SwapStarted","type":"event","signature":"0xf60309f865a6aa297da5fac6188136a02e5acfdf6e8f6d35257a9f4e9653170f"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"filledBSCTx","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x50877c77"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"registeredERC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xee514bc3"},{"inputs":[],"name":"swapFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x54cf2aeb"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address payable","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"fee","type":"uint256"}],"name":"setSwapFee","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x34e19907"},{"inputs":[{"internalType":"address","name":"erc1155Addr","type":"address"}],"name":"register1155SwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x841af51f"},{"inputs":[{"internalType":"address","name":"erc721Addr","type":"address"}],"name":"register721SwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x03db8c72"},{"inputs":[{"internalType":"address","name":"erc20Addr","type":"address"}],"name":"registerSwapPairToBSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x5c13c151"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fillBSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x9867df11"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"fill721BSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x279b4568"},{"inputs":[{"internalType":"bytes32","name":"bscTxHash","type":"bytes32"},{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"address","name":"toAddress","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fill1155BSC2ETHSwap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function","signature":"0x790486ae"},{"inputs":[{"internalType":"address","name":"erc20Addr","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swapETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xb9927a9c"},{"inputs":[{"internalType":"address","name":"erc721Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"swap721ETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x08b3def6"},{"inputs":[{"internalType":"address","name":"erc1155Addr","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"swap1155ETH2BSC","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0x4977937a"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"onERC721Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0x150b7a02"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xf23a6e61"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155BatchReceived","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function","signature":"0xbc197c81"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"}]')
+        const eth = new web3.eth.Contract(ethABI, ethAddress);
+
+        const type = parseInt(document.querySelector("#type").value);
+
+        let method;
+        if (type === 20) {
+            method = "registerSwapPairToBSC"
+        } else if (type === 721) {
+            method = "register721SwapPairToBSC"
+        } else if (type === 1155) {
+            method = "register1155SwapPairToBSC"
+        }
+        console.log('type->' + type);
+
+        if (method === undefined) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "Please choose correct asset type on ETH. 20 for ERC20, 721 for ERC721, 1155 for ERC1155";
+            document.querySelector("#register").disabled = false;
+            return;
+        }
+        const contract = document.querySelector("#contract").value;
+        if (contract === undefined  || contract.length !== 42) {
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = "Wrong contract length";
+            document.querySelector("#register").disabled = false;
+            return;
+        }
+        console.log('contract->' + contract);
+        console.log('method->' + method);
+
+        let contractRegisterResult = await eth.methods[method](contract).send({
+            from: selectedAccount,
+            gas: 500000
+        }).catch((err) => {
+            console.log('err->' + JSON.stringify(err) );
+            clearInterval(sendOrderStatus);
+            document.querySelector("#progress").textContent = err.message;
+        });
+        if (contractRegisterResult !== undefined) {
+            console.log('contractRegisterResult:', contractRegisterResult.transactionHash);
+            document.querySelector("#register").disabled = false;
+            document.querySelector("#buy-obs-result").style.display = "inline-block";
+            resultURL = "https://etherscan.io/tx/" + contractRegisterResult.transactionHash
+            if (chainId === 42) resultURL = "http://kovan.etherscan.io/tx/" + contractRegisterResult.transactionHash
+            document.querySelector("#progress").style.display = "none";
+        } else {
+            // document.querySelector("#obsamount").textContent = "Result undefined";
+            document.querySelector("#progress").style.display = "none";
+        }
+        clearInterval(sendOrderStatus);
+    }
+
+    async function onApproveBSC () {
+        await onApprove(true);
+    }
+    async function onApproveETH () {
+        await onApprove(false);
+    }
+
+    async function onConvertBSC () {
+        await onConvert(true);
+    }
+    async function onConvertETH () {
+        await onConvert(false);
+    }
+        /**
+     * Main entry point.
+     */
+
+    window.addEventListener('load', async () => {
+        init();
+        document.querySelector("#btn-connect").addEventListener("click", onConnect);
+        document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
+        document.querySelector("#approve").addEventListener("click", onApproveETH);
+        document.querySelector("#convert").addEventListener("click", onConvertETH);
+        document.querySelector("#register").addEventListener("click", onRegister);
+
+        document.querySelector("#approveBSC").addEventListener("click", onApproveBSC);
+        document.querySelector("#convertBSC").addEventListener("click", onConvertBSC);
+
+        // document.querySelector("#amount").addEventListener("input", onAmountChange);
+        document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
+    });
+
+    window.onload = function () {
+        init()
+    }
+</script>
+<script>
+    (function () {
+
+    })();
+</script>
