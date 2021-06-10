@@ -388,12 +388,6 @@
         document.querySelector("#connected").style.display = "block";
     }
     
-    /**
-     * onResultClick button pressed.
-     */
-    async function onResultClick () {
-        window.open(resultURL, '_blank').focus();
-    }
     async function onOpenImageClick (element) {
         let text = 'https://ru.openbisea.io/detailsnft?tokenID=' + auctionsNormalized[element.parentNode.parentNode.rowIndex].tokenID;
         copyToClipboard(text)

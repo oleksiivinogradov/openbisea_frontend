@@ -582,13 +582,6 @@
     document.querySelector("#connected").style.display = "block";
   }
 
-  /**
-   * onResultClick button pressed.
-   */
-  async function onResultClick () {
-    window.open(resultURL, '_blank').focus();
-  }
-
   async function onCreateClick () {
     let url = "https://openbisea.io/auctioncreate-v2?tokenID=" + tokenIDsaved;
     if (contractSaved !== undefined) url = url + "&contract=" + contractSaved;

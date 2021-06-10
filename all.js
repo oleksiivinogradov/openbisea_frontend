@@ -134,3 +134,10 @@ async function onDisconnect() {
     document.querySelector("#prepare").style.display = "block";
     document.querySelector("#connected").style.display = "none";
 }
+
+/**
+* onResultClick button pressed.
+*/
+async function onResultClick() {
+    window.open(resultURL, '_blank').focus();
+}
