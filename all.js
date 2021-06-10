@@ -63,7 +63,7 @@ function copyToClipboard(text) {
 * - User switches networks in wallet
 * - User connects wallet initially
 */
-async function refreshAccountData () {
+async function refreshAccountData() {
     // If any current data is displayed when
     // the user is switching acounts in the wallet
     // immediate hide this data
@@ -82,9 +82,9 @@ async function refreshAccountData () {
 /**
 * Connect wallet button pressed.
 */
-async function onConnect () {
+async function onConnect() {
     console.log("Opening a dialog", web3Modal);
-    
+
     try {
         provider = await web3Modal.connect();
     } catch (e) {
@@ -108,4 +108,29 @@ async function onConnect () {
     });
 
     await refreshAccountData();
+}
+
+/**
+* Disconnect wallet button pressed.
+*/
+async function onDisconnect() {
+    console.log("Killing the wallet connection", provider);
+
+    // TODO: Which providers have close method?
+    if (provider.close) {
+        await provider.close();
+
+        // If the cached provider is not cleared,
+        // WalletConnect will default to the existing session
+        // and does not allow to re-scan the QR code with a new wallet.
+        // Depending on your use case you may want or want not his behavir.
+        await web3Modal.clearCachedProvider();
+        provider = null;
+    }
+
+    selectedAccount = null;
+
+    // Set the UI back to the initial state
+    document.querySelector("#prepare").style.display = "block";
+    document.querySelector("#connected").style.display = "none";
 }
