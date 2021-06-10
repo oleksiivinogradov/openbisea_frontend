@@ -1,18 +1,18 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
       integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossOrigin="anonymous">
 
-<div className="container" style="display: table;margin-right: auto;margin-left: auto;text-align:center;">
-    <div className="row">
-        <div className="col-md-12">
+<div class="container" style="display: table;margin-right: auto;margin-left: auto;text-align:center;">
+    <div class="row">
+        <div class="col-md-12">
             <h1>Auctions</h1>
 
-            <div className="alert alert-danger" id="alert-error-https" style="display: none">
+            <div class="alert alert-danger" id="alert-error-https" style="display: none">
                 You can run this example only over HTTPS connection.
             </div>
 
             <div id="prepare">
                 <p>No wallet connected. Connect wallet to show accounts and their BNB balances.</p>
-                <button className="btn btn-primary" id="btn-connect" style="background-color: #fcbd24;color:black">
+                <button class="btn btn-primary" id="btn-connect" style="background-color: #fcbd24;color:black">
                     Connect wallet
                 </button>
                 <br>
@@ -22,7 +22,7 @@
 
             <div id="connected" style="display: none; text-align: center;">
 
-                <table className="table table-listing">
+                <table class="table table-listing">
                     <thead>
                     <th style="text-align: center;">Name</th>
                     <th style="text-align: center;">Link</th>
@@ -42,7 +42,7 @@
 
                 <br>
                 <div id="resultstrans" style="text-align: center;">
-                    <button className="btn btn-primary" id="buy-obs-result"
+                    <button class="btn btn-primary" id="buy-obs-result"
                             style="display: none;background-color: white;color:black;"> Check transaction status
                     </button>
                 </div>
@@ -57,7 +57,7 @@
                     <p>
                         <strong>Selected account:</strong> <span id="selected-account"></span>
                     </p>
-                    <button className="btn btn-primary" id="btn-disconnect"
+                    <button class="btn btn-primary" id="btn-disconnect"
                             style="background-color: #fcbd24;color:black">
                         Disconnect wallet
                     </button>
@@ -68,7 +68,7 @@
 
                 <h3>All account balances</h3>
 
-                <table className="table table-listing">
+                <table class="table table-listing">
                     <thead>
                     <th>Address</th>
                     <th>BNB balance</th>
@@ -89,31 +89,31 @@
     <div id="templates" style="display: none">
         <template id="template-balance">
             <tr>
-                <th className="address"></th>
-                <td className="balance"></td>
+                <th class="address"></th>
+                <td class="balance"></td>
             </tr>
         </template>
         <template id="template-auction">
             <tr>
-                <th className="name"></th>
-                <th className="image">
-                    <button className="btn btn-primary" id="openImage" style="background-color: #fcbd24;color:black;"
+                <th class="name"></th>
+                <th class="image">
+                    <button class="btn btn-primary" id="openImage" style="background-color: #fcbd24;color:black;"
                             onClick="onOpenImageClick(this)"> Copy
                     </button>
                 </th>
-                <td className="price"></td>
-                <td className="deadline"></td>
-                <th className="bidAmount">
+                <td class="price"></td>
+                <td class="deadline"></td>
+                <th class="bidAmount">
                     <input type="text" placeholder="bid amount" name="Amount" value=""
                            style="text-align: right; color:black;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;"/>
                 </th>
-                <th className="allow">
-                    <button className="btn btn-primary" style="background-color: #fcbd24;color:black;display: none"
+                <th class="allow">
+                    <button class="btn btn-primary" style="background-color: #fcbd24;color:black;display: none"
                             onClick="onAllowClick(this)"> Approve
                     </button>
                 </th>
-                <th className="bid">
-                    <button className="btn btn-primary" style="background-color: #fcbd24;color:black;"
+                <th class="bid">
+                    <button class="btn btn-primary" style="background-color: #fcbd24;color:black;"
                             onClick="onBidClick(this)"> Bid
                     </button>
                 </th>
