@@ -1,35 +1,28 @@
 .container {
-    display: table;
-    margin-right: auto;
-    margin-left: auto;
-    text-align:center;
+    margin: 0 auto;
+    text-align: center;
 }
 
 .no_display {
     display: none;
 }
 
-#btn-connect {
+.black_on_yellow {
     background-color: #fcbd24;
     color: black;
 }
 
-#progress {
+.black_on_white {
+    background-color: white;
+    color: black;
+}
+
+.clr_yellow {
     color: #fcbd24;
 }
 
 #buy-obs-result {
     background-color: white;
-    color: black;
-}
-
-#btn-disconnect {
-    background-color: #fcbd24;
-    color: black;
-}
-
-#openImage {
-    background-color: #fcbd24;
     color: black;
 }
 
@@ -41,8 +34,11 @@
     box-shadow: 0 0 5px #fcbd24;
 }
 
-#template-auction tr th.allow button,
-#template-auction tr th.bid button {
-    background-color: #fcbd24;
+/* walletconnect_auction_create_ru page style */
+#connected > input {
     color: black;
+    border: 1px solid #fafafa;
+    box-shadow: 0 0 5px #fcbd24;
+    -webkit-box-shadow: 0 0 6px #fcbd24;
+    -moz-box-shadow: 0 0 5px #fcbd24;
 }

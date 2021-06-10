@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossOrigin="anonymous">
 <link rel="stylesheet" href="all.css">
 
-<div class="container">
+<div class="container" style="display: table;">
   <div class="row">
     <div class="col-md-12">
       <h1>Auctions</h1>
@@ -12,7 +12,7 @@
 
       <div id="prepare">
         <p>No wallet connected. Connect wallet to show accounts and their BNB balances.</p>
-        <button class="btn btn-primary" id="btn-connect">
+        <button id="btn-connect" class="btn btn-primary black_on_yellow">
           Connect wallet
         </button>
         <br>
@@ -34,7 +34,7 @@
           </tbody>
         </table>
 
-        <span id="progress" class="no_display"> Transaction in progress ... </span>
+        <span id="progress" class="clr_yellow no_display"> Transaction in progress ... </span>
         <br>
 
         <div id="resultstrans" class="text-center">
@@ -54,7 +54,7 @@
             <strong>Selected account:</strong>
             <span id="selected-account"></span>
           </p>
-          <button class="btn btn-primary" id="btn-disconnect">
+          <button id="btn-disconnect" class="btn btn-primary black_on_yellow">
             Disconnect wallet
           </button>
         </div>
@@ -91,7 +91,7 @@
       <tr>
         <th class="name"></th>
         <th class="image">
-          <button id="openImage" class="btn btn-primary" onClick="onOpenImageClick(this)">
+          <button id="openImage" class="btn btn-primary black_on_yellow" onClick="onOpenImageClick(this)">
             Copy
           </button>
         </th>
@@ -101,12 +101,12 @@
           <input type="text" class="text-right" name="Amount" value="" placeholder="bid amount" />
         </th>
         <th class="allow">
-          <button class="btn btn-primary no_display" onClick="onAllowClick(this)">
+          <button class="btn btn-primary black_on_yellow no_display" onClick="onAllowClick(this)">
             Approve
           </button>
         </th>
         <th class="bid">
-          <button class="btn btn-primary" onClick="onBidClick(this)">
+          <button class="btn btn-primary black_on_yellow" onClick="onBidClick(this)">
             Bid
           </button>
         </th>
