@@ -127,6 +127,7 @@
 <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+<script type="text/javascript" src="all.js"></script>
 
 <script>
   "use strict";
@@ -267,34 +268,6 @@
       }
     }, 5000);
 
-  }
-
-  function timeSince (date) {
-
-    var seconds = Math.floor((new Date() - date * 1000) / 1000);
-
-    var interval = seconds / 31536000;
-
-    if (interval > 1) {
-      return Math.floor(interval) + " years ago";
-    }
-    interval = seconds / 2592000;
-    if (interval > 1) {
-      return Math.floor(interval) + " months ago";
-    }
-    interval = seconds / 86400;
-    if (interval > 1) {
-      return Math.floor(interval) + " days ago";
-    }
-    interval = seconds / 3600;
-    if (interval > 1) {
-      return Math.floor(interval) + " hours ago";
-    }
-    interval = seconds / 60;
-    if (interval > 1) {
-      return Math.floor(interval) + " minutes ago";
-    }
-    return Math.floor(seconds) + " seconds ago";
   }
 
   function duration (t0, t1) {
