@@ -29,9 +29,9 @@
 #template-auction tr th.bidAmount input {
     color: black;
     border: 1px solid #fafafa;
+    box-shadow: 0 0 5px #fcbd24;
     -webkit-box-shadow: 0 0 6px #fcbd24;
     -moz-box-shadow: 0 0 5px #fcbd24;
-    box-shadow: 0 0 5px #fcbd24;
 }
 
 /* walletconnect_auction_create_ru page style */
@@ -41,4 +41,49 @@
     box-shadow: 0 0 5px #fcbd24;
     -webkit-box-shadow: 0 0 6px #fcbd24;
     -moz-box-shadow: 0 0 5px #fcbd24;
+}
+
+/* walletconnect_details_nft_ru page style */
+.sharethis-inline-share-buttons {
+    display: table;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.custom_style2 {
+    color: black;
+    border-radius: 10px;
+    border: 1px solid #F2BE4B;
+    box-shadow: 0 0 5px #F2BE4B;
+    -webkit-box-shadow: 0 0 6px #F2BE4B;
+    -moz-box-shadow: 0 0 5px #F2BE4B;
+}
+
+.custom_style1 {
+    border-radius: 10px;
+    width: 250px;
+    height: 150px;
+    border: 2px solid #F2BE4B;
+    box-shadow: 0 0 5px #F2BE4B;
+    -webkit-box-shadow: 0 0 6px #F2BE4B;
+    -moz-box-shadow: 0 0 5px #F2BE4B;
+    color: black;
+}
+
+#name {
+    max-width: 240px;
+    height: auto;
+    border-radius: 5px;
+    border: 2px solid #F2BE4B;
+    box-shadow: 0 0 5px #F2BE4B;
+    -webkit-box-shadow: 0 0 6px #F2BE4B;
+    -moz-box-shadow: 0 0 5px #F2BE4B;
+    color:black;
+}
+
+#image {
+    max-width: 240px;
+    height:auto;
+    border: 2px solid #F2BE4B;
+    border-radius: 25px;
 }
