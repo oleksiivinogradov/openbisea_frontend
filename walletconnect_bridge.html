@@ -1,67 +1,68 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="all.css">
 
-<div class="container" style="display: table;margin-right: auto;margin-left: auto;text-align:center;">
+<div class="container" style="display: table;">
     <div class="row">
         <div class="col-md-12">
             <h1>Ethereum - Binance Smart chain bridge</h1>
 
-            <div class="alert alert-danger" id="alert-error-https" style="display: none">
+            <div id="alert-error-https" class="alert alert-danger no_display">
                 You can run this example only over HTTPS connection.
             </div>
 
             <div id="prepare">
                 <p>No wallet connected. Connect wallet to show accounts and their BNB/ETH balances.</p>
-                <button class="btn btn-primary" id="btn-connect" style="background-color: #fcbd24;color:black">
+                <button id="btn-connect" class="btn btn-primary black_on_yellow">
                     Connect wallet
                 </button>
-                <br>
-                <br>
-
+                <br><br>
             </div>
 
-            <div id="connected" style="display: none; text-align: center;">
+            <div id="connected" class="text-center no_display">
                 <h3>Please check if ETH asset contract registered first:</h3>
 
-                <input type="text" placeholder="contract address" name="contract" value="" id="contract" style="border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
-                <br>
-                <br>
-                <input type="number" placeholder="asset type 20 or 721 or 1155" name="type" value="" id="type" style="width:230px;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
-                <br>
-                <br>
-                <button class="btn btn-primary" id="check" onclick="onCheck()" style="background-color: #fcbd24;color:black">
+                <input type="text" id="contract" name="contract" value="" placeholder="contract address" />
+                <br><br>
+
+                <input type="number" id="type" name="type" value="" style="width:230px;" placeholder="asset type 20 or 721 or 1155" />
+                <br><br>
+
+                <button id="check" class="btn btn-primary black_on_yellow" onclick="onCheck()">
                     Check
                 </button>
-                <button class="btn btn-primary" id="register" onclick="onRegister()" style="background-color: #fcbd24;color:black">
+
+                <button id="register" class="btn btn-primary black_on_yellow" onclick="onRegister()">
                     Register contract
                 </button>
                 <br>
-                <span id="checkres" style="color:#fcbd24;"> Contract not checked in.</span>
 
-                <span style="color:#fcbd24;"> Please choose asset to convert depends from type:</span>
+                <span id="checkres" class="clr_yellow"> Contract not checked in.</span>
 
-                <input type="number" placeholder="ERC20/ERC1155 amount (1 for ERC721)" name="amount" value="" id="amount" style="width:230px;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
-                <br>
-                <br>
+                <span class="clr_yellow"> Please choose asset to convert depends from type:</span>
 
-                <input type="number" placeholder="ERC721/ERC1155 tokenID" name="tokenID" value="" id="tokenID" style="width:230px;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;color:black"/>
-                <br>
-                <br>
+                <input type="number" id="amount" name="amount" value="" style="width:230px;" placeholder="ERC20/ERC1155 amount (1 for ERC721)"/>
+                <br><br>
+
+                <input type="number" id="tokenID" name="tokenID" value="" style="width:230px;" placeholder="ERC721/ERC1155 tokenID" />
+                <br><br>
+
                 <hr>
 
                 <h3>Convert from Ethereum to Binance Smart Chain:</h3>
-                <button class="btn btn-primary" id="approve" style="background-color: #fcbd24;color:black"> Approve ETH </button>
-                <button class="btn btn-primary" id="convert" style="background-color: #fcbd24;color:black"> Convert ETH </button>
+                <button id="approve" class="btn btn-primary black_on_yellow"> Approve ETH </button>
+                <button id="convert" class="btn btn-primary black_on_yellow"> Convert ETH </button>
                 <br>
+                
                 <hr>
 
                 <h3>Convert back from Binance Smart Chain to Ethereum</h3>
-                <button class="btn btn-primary" id="approveBSC" style="background-color: #fcbd24;color:black"> Approve BSC </button>
-                <button class="btn btn-primary" id="convertBSC" style="background-color: #fcbd24;color:black"> Convert BSC </button>
-                <span id="progress" style="color:#fcbd24;display: none;"> Transaction in progress ...</span>
-
+                <button id="approveBSC" class="btn btn-primary black_on_yellow"> Approve BSC </button>
+                <button id="convertBSC" class="btn btn-primary black_on_yellow"> Convert BSC </button>
+                <span id="progress" class="clr_yellow no_display"> Transaction in progress ...</span>
                 <br>
-                <div id="resultstrans" style="text-align: center;">
-                    <button class="btn btn-primary" id="buy-obs-result" style="display: none;background-color: white;color:black;" > Check transaction status </button>
+
+                <div id="resultstrans" class="text-center">
+                    <button id="buy-obs-result" class="btn btn-primary black_on_white no_display"> Check transaction status </button>
                 </div>
 
                 <hr>
@@ -70,37 +71,32 @@
                     <p>
                         <strong>Connected blockchain:</strong> <span id="network-name"></span>
                     </p>
-
                     <p>
                         <strong>Selected account:</strong> <span id="selected-account"></span>
                     </p>
-                    <button class="btn btn-primary" id="btn-disconnect" style="background-color: #fcbd24;color:black">
+                    <button id="btn-disconnect" class="btn btn-primary black_on_yellow">
                         Disconnect wallet
                     </button>
-
                 </div>
-
 
                 <h3>All account balances</h3>
 
                 <table class="table table-listing">
                     <thead>
-                    <th>Address</th>
-                    <th>BNB/ETH balance</th>
+                        <th>Address</th>
+                        <th>BNB/ETH balance</th>
                     </thead>
-
                     <tbody id="accounts">
                     </tbody>
                 </table>
 
                 <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p>
-
             </div>
         </div>
     </div>
 
     <!-- We use simple <template> templating for the example -->
-    <div id="templates" style="display: none">
+    <div id="templates" class="no_display">
         <template id="template-balance">
             <tr>
                 <th class="address"></th>
