@@ -536,38 +536,6 @@
   }
 
   /**
-   * Buy button pressed.
-   */
-  async function onAmountChange () {
-    const web3 = new Web3(provider);
-    const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-      document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
-      document.querySelector("#mint").disabled = true;
-      return;
-    }
-    let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
-    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-    const openbiseaABI = _openbiseaABI;
-    const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-    const amountText = document.querySelector("#amount").value;
-    const amountDouble = parseFloat(amountText);
-    if (amountDouble <= 0.1) {
-      document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
-      document.querySelector("#mint").disabled = true;
-      return;
-    }
-    const purchaseAmount = parseFloat(amountText) * (10 ** 18) + '';
-    console.log('amount:', amountText);
-    console.log('purchaseAmount:', purchaseAmount);
-
-    let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call();
-    console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
-    document.querySelector("#obsamount").textContent = "You will receive:" + Number(parseFloat(tokensForPurchaseAmountOBSResult[0]) / (10 ** 18)).toFixed(2) + " OBS";
-    document.querySelector("#mint").disabled = false;
-  }
-
-  /**
    * Main entry point.
    */
   window.addEventListener('load', async () => {
