@@ -177,23 +177,6 @@
 <script>
   "use strict";
 
-  /**
-   * Example JavaScript code that interacts with the page and Web3 wallets
-   */
-  function getQueryParams (qs) {
-    qs = qs.split('+').join(' ');
-
-    var params = {},
-      tokens,
-      re = /[?&]?([^=]+)=([^&]*)/g;
-
-    while (tokens = re.exec(qs)) {
-      params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
-    }
-
-    return params;
-  }
-
   // Unpkg imports
   const Web3Modal = window.Web3Modal.default;
   const WalletConnectProvider = window.WalletConnectProvider.default;

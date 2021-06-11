@@ -1,3 +1,20 @@
+/**
+* Example JavaScript code that interacts with the page and Web3 wallets
+*/
+function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+        tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+}
+
 function timeSince(date) {
     var seconds = Math.floor((new Date() - date * 1000) / 1000);
     var interval = seconds / 31536000;
