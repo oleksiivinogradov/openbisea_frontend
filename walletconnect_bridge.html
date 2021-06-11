@@ -143,8 +143,7 @@
     /**
      * Setup the orchestra
      */
-    function init () {
-
+    function init() {
         console.log("Initializing example");
         console.log("WalletConnectProvider is", WalletConnectProvider);
         console.log("Fortmatic is", Fortmatic);
@@ -197,8 +196,7 @@
     /**
      * Kick in the UI action after Web3modal dialog has chosen a provider
      */
-    async function fetchAccountData () {
-
+    async function fetchAccountData() {
         // Get a Web3 instance for the wallet
         const web3 = new Web3(provider);
 
@@ -250,7 +248,7 @@
         document.querySelector("#connected").style.display = "block";
     }
 
-    async function onApprove (isBSC) {
+    async function onApprove(isBSC) {
         console.log('onApprove->' + isBSC);
 
         document.querySelector("#progress").style.display = "block";
@@ -263,6 +261,7 @@
             countDots++;
             if (countDots === 4) countDots = 0;
         }, 1000);
+
         const web3 = new Web3(provider);
         const chainId = await web3.eth.getChainId();
         if (isBSC === false && chainId !== 1 && chainId !== 42) {
@@ -271,6 +270,7 @@
             document.querySelector("#approve").disabled = false;
             return;
         }
+
         if (isBSC === true && chainId !== 56 && chainId !== 97) {
             clearInterval(sendOrderStatus);
             document.querySelector("#progress").textContent = "We support only BSC mainnet";
@@ -285,6 +285,7 @@
             document.querySelector("#approve").disabled = false;
             return;
         }
+
         const type = parseInt(document.querySelector("#type").value);
         let amount = parseFloat(document.querySelector("#amount").value);
         if (amount.length === 0 || isNaN(amount)) amount = 1;
@@ -343,16 +344,17 @@
             clearInterval(sendOrderStatus);
             document.querySelector("#progress").textContent = err.message;
         });
+
         if (contractApproveResult !== undefined) {
             console.log('contractRegisterResult:', contractApproveResult.transactionHash);
             document.querySelector("#approve").disabled = false;
             document.querySelector("#buy-obs-result").style.display = "inline-block";
             if (isBSC === true) {
-                resultURL = "https://bscscan.com/tx/" + contractApproveResult.transactionHash
-                if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + contractApproveResult.transactionHash
+                resultURL = "https://bscscan.com/tx/" + contractApproveResult.transactionHash;
+                if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + contractApproveResult.transactionHash;
             } else {
-                resultURL = "https://etherscan.io/tx/" + contractApproveResult.transactionHash
-                if (chainId === 42) resultURL = "http://kovan.etherscan.io/tx/" + contractApproveResult.transactionHash
+                resultURL = "https://etherscan.io/tx/" + contractApproveResult.transactionHash;
+                if (chainId === 42) resultURL = "http://kovan.etherscan.io/tx/" + contractApproveResult.transactionHash;
             }
 
             document.querySelector("#progress").style.display = "none";
@@ -360,10 +362,11 @@
             // document.querySelector("#obsamount").textContent = "Result undefined";
             document.querySelector("#progress").style.display = "none";
         }
+
         clearInterval(sendOrderStatus);
     }
 
-    async function onConvert (isBSC) {
+    async function onConvert(isBSC) {
         document.querySelector("#progress").style.display = "block";
         document.querySelector("#convert").disabled = true;
 
@@ -374,6 +377,7 @@
             countDots++;
             if (countDots === 4) countDots = 0;
         }, 1000);
+
         const web3 = new Web3(provider);
         const chainId = await web3.eth.getChainId();
         if (isBSC === false && chainId !== 1 && chainId !== 42) {
@@ -388,7 +392,6 @@
             document.querySelector("#convert").disabled = false;
             return;
         }
-
 
         let ethAddress = '0x0440e9FA9C4c4C2B60A8942c64a870b9cd8e03FE';
         if (chainId === 42) ethAddress = "0xa47d25C2fa71f6e4790A3F3C6290ba14672f43F5";
@@ -451,8 +454,8 @@
             document.querySelector("#convert").disabled = false;
             return;
         }
-        console.log('type->' + type);
 
+        console.log('type->' + type);
         console.log('method->' + method);
         console.log('swapFee->' + swapFee);
 
@@ -465,6 +468,7 @@
             clearInterval(sendOrderStatus);
             document.querySelector("#progress").textContent = err.message;
         });
+
         if (contractConvertResult !== undefined) {
             console.log('contractRegisterResult:', contractConvertResult.transactionHash);
             document.querySelector("#convert").disabled = false;
@@ -481,9 +485,11 @@
             // document.querySelector("#obsamount").textContent = "Result undefined";
             document.querySelector("#progress").style.display = "none";
         }
+
         clearInterval(sendOrderStatus);
     }
-    async function onCheck () {
+
+    async function onCheck() {
         // document.querySelector("#progress").style.display = "block";
         document.querySelector("#check").disabled = true;
 
@@ -494,6 +500,7 @@
             countDots++;
             if (countDots === 4) countDots = 0;
         }, 1000);
+
         const web3 = new Web3(provider);
         const chainId = await web3.eth.getChainId();
         if (chainId !== 1 && chainId !== 42) {
@@ -502,6 +509,7 @@
             document.querySelector("#register").disabled = false;
             return;
         }
+
         const contract = document.querySelector("#contract").value;
         if (contract === undefined  || contract.length !== 42) {
             clearInterval(sendOrderStatus);
@@ -526,10 +534,11 @@
             document.querySelector("#checkres").textContent = "Contract registered, you can swap assets.";
         }
         document.querySelector("#check").disabled = false;
-        clearInterval(sendOrderStatus);
 
+        clearInterval(sendOrderStatus);
     }
-    async function onRegister () {
+
+    async function onRegister() {
         document.querySelector("#progress").style.display = "block";
         document.querySelector("#register").disabled = true;
 
@@ -540,6 +549,7 @@
             countDots++;
             if (countDots === 4) countDots = 0;
         }, 1000);
+
         const web3 = new Web3(provider);
         const chainId = await web3.eth.getChainId();
         if (chainId !== 1 && chainId !== 42) {
@@ -572,6 +582,7 @@
             document.querySelector("#register").disabled = false;
             return;
         }
+
         const contract = document.querySelector("#contract").value;
         if (contract === undefined  || contract.length !== 42) {
             clearInterval(sendOrderStatus);
@@ -590,6 +601,7 @@
             clearInterval(sendOrderStatus);
             document.querySelector("#progress").textContent = err.message;
         });
+
         if (contractRegisterResult !== undefined) {
             console.log('contractRegisterResult:', contractRegisterResult.transactionHash);
             document.querySelector("#register").disabled = false;
@@ -601,23 +613,27 @@
             // document.querySelector("#obsamount").textContent = "Result undefined";
             document.querySelector("#progress").style.display = "none";
         }
+
         clearInterval(sendOrderStatus);
     }
 
-    async function onApproveBSC () {
+    async function onApproveBSC() {
         await onApprove(true);
     }
-    async function onApproveETH () {
+
+    async function onApproveETH() {
         await onApprove(false);
     }
 
-    async function onConvertBSC () {
+    async function onConvertBSC() {
         await onConvert(true);
     }
-    async function onConvertETH () {
+
+    async function onConvertETH() {
         await onConvert(false);
     }
-        /**
+
+    /**
      * Main entry point.
      */
 
@@ -637,11 +653,6 @@
     });
 
     window.onload = function () {
-        init()
+        init();
     }
-</script>
-<script>
-    (function () {
-
-    })();
 </script>
