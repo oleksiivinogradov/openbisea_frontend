@@ -83,7 +83,23 @@
 
 #image {
     max-width: 240px;
-    height:auto;
+    height: auto;
     border: 2px solid #F2BE4B;
     border-radius: 25px;
+}
+
+/* walletconnect_details_nft page style */
+#threed {
+    border-radius: 25px;border: 2px solid #F2BE4B;width: 800px; height: 600px;
+}
+
+#desc {
+    border-radius: 10px;
+    width: 250px;
+    height: 150px;
+    border: 2px solid #F2BE4B;
+    box-shadow: 0 0 5px #F2BE4B;
+    -webkit-box-shadow: 0 0 6px #F2BE4B;
+    -moz-box-shadow: 0 0 5px #F2BE4B;
+    color: black;
 }

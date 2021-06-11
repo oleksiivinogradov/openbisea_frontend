@@ -1,162 +1,146 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
       integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossOrigin="anonymous">
+<link type="text/css" rel="stylesheet" href="https://oleksiivinogradov.github.io/openbisea_frontend/all.css">
 <script type="text/javascript"
         src="https://platform-api.sharethis.com/js/sharethis.js#property=609d3a22ccbbe50012c02cb7&product=inline-share-buttons"
         async="async"></script>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
-<div class="container" style="display: table;margin-right: auto;margin-left: auto;text-align:center;">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="sharethis-inline-share-buttons" style="display: table;margin-right: auto;margin-left: auto;"></div>
+<div class="container" style="display: table;">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="sharethis-inline-share-buttons"></div>
 
-            <h1>NFT details</h1>
-            <div class="alert alert-danger" id="alert-error-https" style="display: none">
-                You can run this example only over HTTPS connection.
-            </div>
-            <img style="max-width: 240px;height:auto;border-radius: 25px;border: 2px solid #F2BE4B;" id="image" src="">
-            <br>
-            <br>
+      <h1>NFT details</h1>
+      <div id="alert-error-https" class="alert alert-danger no_display">
+        You can run this example only over HTTPS connection.
+      </div>
+      <img id="image" src="">
+      <br><br>
 
-            <model-viewer src="" id="threed" alt="demo" style="display: none;border-radius: 25px;border: 2px solid #F2BE4B;width: 800px; height: 600px;" auto-rotate camera-controls></model-viewer>
+      <model-viewer id="threed" class="no_display" src="" alt="demo" auto-rotate camera-controls></model-viewer>
+      <br><br>
 
-            <br>
-            <br>
+      <textarea type="text" id="name" readonly="readonly" name="name" value=""></textarea>
+      <br><br>
 
-            <textarea type="text" readonly="readonly" name="name" value="" id="name" style="max-width: 240px;height:auto;border-radius: 5px;border:2px solid #F2BE4B;-webkit-box-shadow:0 0 6px #F2BE4B;-moz-box-shadow:0 0 5px #F2BE4B;box-shadow:0 0 5px #F2BE4B;color:black"></textarea>
-            <br>
-            <br>
+      <textarea id="desc" name="desc" readonly="readonly" placeholder="description">Loading... </textarea>
+      <br><br>
 
-            <textarea  id="desc" name="desc" readonly="readonly" placeholder="description" style="border-radius: 10px;width:250px;height:150px;border:2px solid #F2BE4B;-webkit-box-shadow:0 0 6px #F2BE4B;-moz-box-shadow:0 0 5px #F2BE4B;box-shadow:0 0 5px #F2BE4B;color:black">Loading... </textarea>
-            <br>
-            <br>
+      <input type="text" id="artist" class="custom_style2" name="artist" readonly="readonly" placeholder="Artist" value="" />
+      <br><br>
 
-            <input type="text" placeholder="Artist" readonly="readonly"  name="artist" value="" id="artist" style="border-radius: 10px;border:1px solid #F2BE4B;-webkit-box-shadow:0 0 6px #F2BE4B;-moz-box-shadow:0 0 5px #F2BE4B;box-shadow:0 0 5px #F2BE4B;color:black"/>
-            <br>
-            <br>
+      <textarea type="text" id="public_profile_link" class="custom_style2" name="public_profile_link" value="" readonly="readonly" placeholder="Public profile link"></textarea>
+      <br><br>
 
-            <textarea type="text" readonly="readonly"  placeholder="Public profile link" name="public_profile_link" value="" id="public_profile_link" style="border-radius: 10px;border:1px solid #F2BE4B;-webkit-box-shadow:0 0 6px #F2BE4B;-moz-box-shadow:0 0 5px #F2BE4B;box-shadow:0 0 5px #F2BE4B;color:black"></textarea>
-            <br>
-            <br>
-            <p id="owner">NFT owner loading...</p>
+      <p id="owner">NFT owner loading...</p>
 
-            <button class="btn btn-primary" id="create-auction" style="display: none;background-color: #fcbd24;color:black">
-                Create auction
-            </button>
+      <button id="create-auction" class="btn btn-primary black_on_yellow no_display">
+        Create auction
+      </button>
 
-            <button class="btn btn-primary" id="cancel-auction" style="display: none;background-color: #fcbd24;color:black">
-                Cancel auction
-            </button>
+      <button id="cancel-auction" class="btn btn-primary black_on_yellow no_display">
+        Cancel auction
+      </button>
 
-            <div id="prepare">
-                <p>No wallet connected. Connect wallet to show accounts and their BNB balances.</p>
-                <button class="btn btn-primary" id="btn-connect" style="background-color: #fcbd24;color:black">
-                    Connect wallet
-                </button>
-                <br>
-                <br>
+      <div id="prepare">
+        <p>No wallet connected. Connect wallet to show accounts and their BNB balances.</p>
+        <button id="btn-connect" class="btn btn-primary black_on_yellow">
+          Connect wallet
+        </button>
+        <br><br>
+      </div>
 
-            </div>
-            <div id="whitelist" style="display: none; text-align: center;">
-                <p>Contract not whitelisted. Please press Whitelist to add.</p>
-                <button class="btn btn-primary" id="btn-whitelist" style="background-color: #fcbd24;color:black">
-                    Whitelist contract
-                </button>
-                <br>
-                <br>
-            </div>
+      <div id="whitelist" class="text-center no_display">
+        <p>Contract not whitelisted. Please press Whitelist to add.</p>
+        <button id="btn-whitelist" class="btn btn-primary black_on_yellow">
+          Whitelist contract
+        </button>
+        <br><br>
+      </div>
 
+      <div id="connected" class="text-center no_display">
+        <table class="table table-listing">
+          <thead>
+            <th class="text-center">Name</th>
+            <th class="text-center">Image</th>
+            <th class="text-center">Price</th>
+            <th class="text-center">Deadline</th>
+            <th class="text-center">Bid amount</th>
+            <th class="text-center">Allow</th>
+            <th class="text-center">Bid</th>
+          </thead>
+          <tbody id="auctions">
+          </tbody>
+        </table>
 
-            <div id="connected" style="display: none; text-align: center;">
+        <span id="progress" class="clr_yellow no_display"> Transaction in progress ...</span>
+        <br>
 
-                <table class="table table-listing">
-                    <thead>
-                    <th style="text-align: center;">Name</th>
-                    <th style="text-align: center;">Image</th>
-                    <th style="text-align: center;">Price</th>
-                    <th style="text-align: center;">Deadline</th>
-                    <th style="text-align: center;">Bid amount</th>
-                    <th style="text-align: center;">Allow</th>
-                    <th style="text-align: center;">Bid</th>
-                    </thead>
-
-                    <tbody id="auctions">
-                    </tbody>
-                </table>
-
-
-
-                <span id="progress" style="color:#fcbd24;display: none;"> Transaction in progress ...</span>
-
-                <br>
-                <div id="resultstrans" style="text-align: center;">
-                    <button class="btn btn-primary" id="buy-obs-result" style="display: none;background-color: white;color:black;" > Check transaction status </button>
-                </div>
-
-                <hr>
-
-                <div id="network">
-                    <p>
-                        <strong>Connected blockchain:</strong> <span id="network-name"></span>
-                    </p>
-
-                    <p>
-                        <strong>Selected account:</strong> <span id="selected-account"></span>
-                    </p>
-                    <button class="btn btn-primary" id="btn-disconnect" style="background-color: #fcbd24;color:black">
-                        Disconnect wallet
-                    </button>
-
-                </div>
-
-                <hr>
-
-                <h3>All account balances</h3>
-
-                <table class="table table-listing">
-                    <thead>
-                    <th>Address</th>
-                    <th>BNB balance</th>
-                    </thead>
-
-                    <tbody id="accounts">
-                    </tbody>
-                </table>
-
-                <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p>
-
-            </div>
+        <div id="resultstrans" class="text-center">
+          <button id="buy-obs-result" class="btn btn-primary black_on_white no_display"> Check transaction status </button>
         </div>
-    </div>
 
-    <!-- We use simple <template> templating for the example -->
-    <div id="templates" style="display: none">
-        <template id="template-balance">
-            <tr>
-                <th class="address"></th>
-                <td class="balance"></td>
-            </tr>
-        </template>
-        <template id="template-auction">
-            <tr>
-                <th class="name"></th>
-                <th class="image">
-                    <button class="btn btn-primary" id="openImage" style="background-color: #fcbd24;color:black;"onclick="onOpenImageClick(this)"> Image </button>
-                </th>
-                <td class="price"></td>
-                <td class="deadline"></td>
-                <th class="bidAmount">
-                    <input type="text" placeholder="bid amount" name="Amount" value="" style="text-align: right; color:black;border:1px solid #fafafa;-webkit-box-shadow:0 0 6px #fcbd24;-moz-box-shadow:0 0 5px #fcbd24;box-shadow:0 0 5px #fcbd24;"/>
-                </th>
-                <th class="allow">
-                    <button class="btn btn-primary" style="background-color: #fcbd24;color:black;display: none" onclick="onAllowClick(this)"> Approve </button>
-                </th>
-                <th class="bid">
-                    <button class="btn btn-primary" style="background-color: #fcbd24;color:black;" onclick="onBidClick(this)"> Bid </button>
-                </th>
-            </tr>
-        </template>
+        <hr>
+
+        <div id="network">
+          <p>
+            <strong>Connected blockchain:</strong> <span id="network-name"></span>
+          </p>
+          <p>
+            <strong>Selected account:</strong> <span id="selected-account"></span>
+          </p>
+          <button id="btn-disconnect" class="btn btn-primary black_on_yellow">
+            Disconnect wallet
+          </button>
+        </div>
+
+        <hr>
+
+        <h3>All account balances</h3>
+
+        <table class="table table-listing">
+          <thead>
+            <th>Address</th>
+            <th>BNB balance</th>
+          </thead>
+          <tbody id="accounts">
+          </tbody>
+        </table>
+
+        <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p>
+      </div>
     </div>
+  </div>
+
+  <!-- We use simple <template> templating for the example -->
+  <div id="templates" class="no_display">
+    <template id="template-balance">
+      <tr>
+        <th class="address"></th>
+        <td class="balance"></td>
+      </tr>
+    </template>
+    <template id="template-auction">
+      <tr>
+        <th class="name"></th>
+        <th class="image">
+          <button id="openImage" class="btn btn-primary black_on_yellow" onclick="onOpenImageClick(this)"> Image </button>
+        </th>
+        <td class="price"></td>
+        <td class="deadline"></td>
+        <th class="bidAmount">
+          <input type="text" class="text-right" name="Amount" value="" placeholder="bid amount" />
+        </th>
+        <th class="allow">
+          <button class="btn btn-primary black_on_yellow no_display" onclick="onAllowClick(this)"> Approve </button>
+        </th>
+        <th class="bid">
+          <button class="btn btn-primary black_on_yellow no_display" onclick="onBidClick(this)"> Bid </button>
+        </th>
+      </tr>
+    </template>
+  </div>
 </div>
 
 <!--
