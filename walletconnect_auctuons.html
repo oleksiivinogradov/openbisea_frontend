@@ -144,8 +144,7 @@
   /**
    * Setup the orchestra
    */
-  function init () {
-
+  function init() {
     console.log("Initializing example");
     console.log("WalletConnectProvider is", WalletConnectProvider);
     console.log("Fortmatic is", Fortmatic);
@@ -190,7 +189,7 @@
 
     console.log("Web3Modal instance is", web3Modal);
     let attempts = 0;
-    let sendOrderStatus = setInterval(async function () {
+    let sendOrderStatus = setInterval(async function() {
       if (window.BinanceChain !== undefined) {
         clearInterval(sendOrderStatus);
         console.log("YES window.BinanceChain ");
@@ -231,6 +230,7 @@
             // Do any other work!
           }
         }
+
         BinanceChain
           .request({ method: 'eth_requestAccounts' })
           .then(handleAccountsChanged)
@@ -243,7 +243,6 @@
               console.error(err);
             }
           });
-
       } else {
         console.log("NO window.BinanceChain ");
         attempts = attempts + 1;
@@ -252,15 +251,13 @@
         }
       }
     }, 5000);
-
   }
 
   let auctionsNormalized = {};
   /**
    * Kick in the UI action after Web3modal dialog has chosen a provider
    */
-  async function fetchAccountData () {
-
+  async function fetchAccountData() {
     auctionsNormalized = {};
     // Get a Web3 instance for the wallet
     const web3 = new Web3(provider);
@@ -323,8 +320,6 @@
     let openBiSeaAuctionAddress = openBiSeaAuctionAddressMainnet;
     if (chainId === 97) openBiSeaAuctionAddress = openBiSeaAuctionAddressTestnet;
     let openBiSeaAuctionContract = new web3.eth.Contract(openBiSeaAuctionAbi, openBiSeaAuctionAddress);
-
-
 
     let contractWhitelisted = await openBiSeaAuctionContract.methods.contractsNFTWhitelisted().call().catch(function (error) { console.log('contractsNFTWhitelisted:' + error) });
     const templateAuction = document.querySelector("#template-auction");
@@ -391,7 +386,7 @@
 
           // console.log('clone.querySelector(".bidAmount").children[0].value ', clone.querySelector(".bidAmount").children[0].value);
           // console.log('clone.querySelector(".bidAmount")children[0] ', clone.querySelector(".bidAmount").children[0]);
-          let image
+          let image;
           if (tokenMetadata.image.includes("ipfs://ipfs/")) {
             image = tokenMetadata.image.replace('ipfs://ipfs/', 'https://ipfs.io/ipfs/');
           } else {
@@ -410,7 +405,6 @@
         } else {
           alert("Ошибка HTTP: " + response.status);
         }
-
       });
 
       await Promise.all(rowResolversAuction);
@@ -421,14 +415,15 @@
     document.querySelector("#connected").style.display = "block";
   }
 
-  async function onOpenImageClick (element) {
+  async function onOpenImageClick(element) {
     let text = 'https://openbisea.io/detailsnft-v2?tokenID=' + auctionsNormalized[element.parentNode.parentNode.rowIndex].tokenID + "&contract=" + auctionsNormalized[element.parentNode.parentNode.rowIndex].contract;
 
     console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex + " text: " + text);
     copyToClipboard(text)
     // window.open(auctionsNormalized[element.parentNode.parentNode.rowIndex].image, '_blank').focus();
   }
-  async function onAllowClick (element) {
+
+  async function onAllowClick(element) {
     console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
     const auctionInfo = auctionsNormalized[element.parentNode.parentNode.rowIndex];
     document.querySelector("#progress").style.display = "block";
@@ -440,6 +435,7 @@
       countDots++;
       if (countDots === 4) countDots = 0;
     }, 1000);
+
     const web3 = new Web3(provider);
     const chainId = await web3.eth.getChainId();
     if (chainId !== 56 && chainId !== 97) {
@@ -448,6 +444,7 @@
       // document.querySelector("#progress").style.display = "none";
       return;
     }
+
     let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
 
@@ -465,6 +462,7 @@
       // document.querySelector("#progress").style.display = "none";
       return;
     }
+
     element.disabled = true;
     element.parentNode.parentNode.children[4].children[0].setAttribute("readonly", true)
     console.log('element.parentNode.parentNode.children[4].children[0]:', element.parentNode.parentNode.children[4].children[0]);
@@ -477,8 +475,8 @@
       console.log('err->' + JSON.stringify(err) );
       document.querySelector("#progress").textContent = err.message;
       element.parentNode.parentNode.children[4].children[0].setAttribute("readonly",false);
-
     });
+
     if (approveResult !== undefined) {
       console.log('bidResult:', approveResult.transactionHash);
       element.disabled = false;
@@ -493,10 +491,11 @@
       document.querySelector("#progress").style.display = "none";
       element.parentNode.parentNode.children[4].children[0].setAttribute("readonly",false);
     }
-    clearInterval(sendOrderStatus);
 
+    clearInterval(sendOrderStatus);
   }
-  async function onBidClick (element) {
+
+  async function onBidClick(element) {
     var element = event.target || event.srcElement;
     console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
     const auctionInfo = auctionsNormalized[element.parentNode.parentNode.rowIndex];
@@ -510,6 +509,7 @@
       countDots++;
       if (countDots === 4) countDots = 0;
     }, 1000);
+
     const web3 = new Web3(provider);
     const chainId = await web3.eth.getChainId();
     if (chainId !== 56 && chainId !== 97) {
@@ -518,6 +518,7 @@
       // document.querySelector("#progress").style.display = "none";
       return;
     }
+
     let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
     const openbiseaABI = _openbiseaABI;
@@ -547,6 +548,7 @@
     console.log("amountText",amountText);
     console.log("element.parentNode",element.parentNode);
     console.log("element.parentNode.parentNode",element.parentNode.parentNode);
+
     if (auctionInfo.isUSD === true) {
       // NEED allowance.
       bidResult = await openbisea.methods.bidUSD(nftContractAddress,auctionInfo.tokenID + "",purchaseAmount,false).send({
@@ -578,6 +580,7 @@
       // document.querySelector("#obsamount").textContent = "Result undefined";
       document.querySelector("#progress").style.display = "none";
     }
+
     clearInterval(sendOrderStatus);
   }
 
@@ -590,15 +593,9 @@
     document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
     // document.querySelector("#amount").addEventListener("input", onAmountChange);
     document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
-
   });
 
-  window.onload = function () {
-    init()
+  window.onload = function() {
+    init();
   }
-</script>
-<script>
-  (function () {
-
-  })();
 </script>
