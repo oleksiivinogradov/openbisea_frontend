@@ -90,16 +90,30 @@
 
 /* walletconnect_details_nft page style */
 #threed {
-    border-radius: 25px;border: 2px solid #F2BE4B;width: 800px; height: 600px;
+    width: 800px;
+    height: 600px;
+    border: 2px solid #F2BE4B;
+    border-radius: 25px;
 }
 
 #desc {
-    border-radius: 10px;
     width: 250px;
     height: 150px;
     border: 2px solid #F2BE4B;
+    border-radius: 10px;
     box-shadow: 0 0 5px #F2BE4B;
     -webkit-box-shadow: 0 0 6px #F2BE4B;
     -moz-box-shadow: 0 0 5px #F2BE4B;
+    color: black;
+}
+
+/* walletconnect_mintNFT_ru page style */
+#description {
+    width: 250px;
+    height: 150px;
+    border: 1px solid #fafafa;
+    box-shadow: 0 0 5px #fcbd24;
+    -webkit-box-shadow: 0 0 6px #fcbd24;
+    -moz-box-shadow: 0 0 5px #fcbd24;
     color: black;
 }
