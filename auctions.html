@@ -127,6 +127,13 @@
 <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+<script>
+  var options = {
+    page: 'auctions',
+    lang: 'en',
+    rowResolve: true
+  };
+</script>
 <script type="text/javascript" src="https://oleksiivinogradov.github.io/openbisea_frontend/all.js"></script>
 
 <script>
@@ -271,153 +278,6 @@
   }
 
   let auctionsNormalized = {};
-
-  /**
-   * Kick in the UI action after Web3modal dialog has chosen a provider
-   */
-  async function fetchAccountData () {
-
-    auctionsNormalized = {};
-    // Get a Web3 instance for the wallet
-    const web3 = new Web3(provider);
-
-    console.log("Web3 instance is", web3);
-
-    // Get connected chain id from Ethereum node
-    const chainId = await web3.eth.getChainId();
-    // Load chain information over an HTTP API
-    const chainData = evmChains.getChain(chainId);
-    document.querySelector("#network-name").textContent = chainData.name;
-
-    // Get list of accounts of the connected wallet
-    const accounts = await web3.eth.getAccounts();
-
-    // MetaMask does not give you all accounts, only the selected account
-    console.log("Got accounts", accounts);
-    selectedAccount = accounts[0];
-
-    document.querySelector("#selected-account").textContent = selectedAccount;
-
-    // Get a handl
-    const template = document.querySelector("#template-balance");
-    const accountContainer = document.querySelector("#accounts");
-
-    // Purge UI elements any previously loaded accounts
-    accountContainer.innerHTML = '';
-
-    // Go through all accounts and get their ETH balance
-    const rowResolvers = accounts.map(async (address) => {
-      const balance = await web3.eth.getBalance(address);
-      // ethBalance is a BigNumber instance
-      // https://github.com/indutny/bn.js/
-      const ethBalance = web3.utils.fromWei(balance, "ether");
-      const humanFriendlyBalance = parseFloat(ethBalance).toFixed(4);
-      // Fill in the templated row and put in the document
-      const clone = template.content.cloneNode(true);
-      clone.querySelector(".address").textContent = address;
-      clone.querySelector(".balance").textContent = humanFriendlyBalance;
-      accountContainer.appendChild(clone);
-    });
-
-    // Because rendering account does its own RPC commucation
-    // with Ethereum node, we do not want to display any results
-    // until data for all accounts is loaded
-    await Promise.all(rowResolvers);
-
-    let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
-
-    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-
-    const erc721abi = _erc721abi;
-
-    const openbiseaABI = _openbiseaABI;
-    const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-
-    const openBiSeaAuctionAbi = _openBiSeaAuctionAbi;
-    const openBiSeaAuctionAddressTestnet = "0xA72821226E7ac461A3CA30434f3D4671c8A3DC37";
-    const openBiSeaAuctionAddressMainnet = "0x1c2b69833967500042d476B1149D4074B59c1A17";
-    let openBiSeaAuctionAddress = openBiSeaAuctionAddressMainnet;
-    if (chainId === 97) openBiSeaAuctionAddress = openBiSeaAuctionAddressTestnet;
-    let openBiSeaAuctionContract = new web3.eth.Contract(openBiSeaAuctionAbi, openBiSeaAuctionAddress);
-
-    let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
-    if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
-    let nftContract = new web3.eth.Contract(erc721abi, nftContractAddress);
-
-    let auctions = await openBiSeaAuctionContract.methods.getNFTsAuctionList("0xb861DF245fc18483235D9C11b87d8A76F4678e08").call().catch(function (error) { console.log('getNFTsAuctionList:' + error) });
-    const templateAuction = document.querySelector("#template-auction");
-    const auctionsContainer = document.querySelector("#auctions");
-    auctionsContainer.innerHTML = '';
-    let index = 1;
-    let now = Math.floor(Date.now() / 1000);
-    const rowResolversAuction = auctions.map(async (auction) => {
-      // console.log('auction',auction);
-      let seller = await openBiSeaAuctionContract.methods.sellerAddressFor(auction).call().catch(function (error) { console.log('sellerAddressFor:' + error) });
-      // console.log('seller',seller);
-
-      let auctionBN = web3.utils.toBN(auction);
-      let sellerBN = web3.utils.toBN(seller);
-      var tokenID = auctionBN.sub(sellerBN).toNumber() + '';
-      let auctionInfo = await openBiSeaAuctionContract.methods.getAuction("0xb861DF245fc18483235D9C11b87d8A76F4678e08", tokenID).call().catch(function (error) { console.log('getAuction:' + error) });
-      console.log('auctionInfo ', auctionInfo);
-      let tokenURI = await nftContract.methods.tokenURI(tokenID).call().catch(function (error) {console.log('tokenURI:' + error)});
-      tokenURI = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
-      let response = await fetch(tokenURI);
-
-      if (response.ok) { // если HTTP-статус в диапазоне 200-299
-        // получаем тело ответа (см. про этот метод ниже)
-        let tokenMetadata = await response.json();
-        // console.log('tokenMetadata ', tokenMetadata);
-        const clone = templateAuction.content.cloneNode(true);
-        clone.querySelector(".name").textContent = tokenMetadata.name;
-        // clone.querySelector(".image").textContent = 'image';
-        // clone.querySelector(".image").href = tokenMetadata.image.replace('ipfs://','https://ipfs.io/ipfs/');
-        const priceFloat = parseFloat(await web3.utils.fromWei(auctionInfo.price))
-        let price = priceFloat + ' BNB';
-        if (auctionInfo.isUSD === true) price = priceFloat + " USD";
-        clone.querySelector(".price").textContent = price;
-        clone.querySelector(".bidAmount").children[0].value = Math.round((priceFloat + 0.00001) * 100000) / 100000;
-
-        if (auctionInfo.isUSD === true) {
-          clone.querySelector(".allow").children[0].style.display = "block"
-          clone.querySelector(".bid").children[0].setAttribute("disabled", "disabled")
-        }
-        var deadline = new Date(parseInt(auctionInfo.deadline) * 1000);
-
-        if (parseInt(auctionInfo.deadline) < now) {
-          clone.querySelector(".bid").children[0].textContent = "Buy now";
-          console.log('clone.querySelector(".bid").children[0] ', clone.querySelector(".bid").children[0]);
-          let deadlineText = timeSince(auctionInfo.deadline);
-          clone.querySelector(".deadline").textContent = deadlineText;
-        } else {
-          let dur = duration(deadline, Date.now());
-          clone.querySelector(".deadline").textContent = 'in ' + dur.days + ' days,' + dur.hours + ' hours';
-        }
-
-        // console.log('clone.querySelector(".bidAmount").children[0].value ', clone.querySelector(".bidAmount").children[0].value);
-        // console.log('clone.querySelector(".bidAmount")children[0] ', clone.querySelector(".bidAmount").children[0]);
-
-        auctionInfo.image = tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
-        auctionInfo.tokenID = tokenID;
-        auctionInfo.name = tokenMetadata.name;
-
-        auctionsNormalized[index] = auctionInfo;
-        await auctionsContainer.appendChild(clone);
-        // var index = Array.prototype.indexOf.call(auctionsContainer, clone);
-        // console.log('index ', index);
-        index = index + 1;
-      } else {
-        alert("Ошибка HTTP: " + response.status);
-      }
-
-    });
-
-    await Promise.all(rowResolversAuction);
-
-    // Display fully loaded UI for wallet data
-    document.querySelector("#prepare").style.display = "none";
-    document.querySelector("#connected").style.display = "block";
-  }
 
   async function onOpenImageClick (element) {
     let text = 'https://openbisea.io/detailsnft?tokenID=' + auctionsNormalized[element.parentNode.parentNode.rowIndex].tokenID;
