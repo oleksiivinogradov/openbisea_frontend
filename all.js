@@ -464,3 +464,42 @@ async function onDisconnect() {
 async function onResultClick() {
     window.open(resultURL, '_blank').focus();
 }
+
+/**
+* Translation
+*/
+function Translate() {
+    //initialization
+    this.init = function (attribute, lng) {
+        this.attribute = attribute;
+        this.lng = lng;
+    }
+    //translate 
+    this.process = function () {
+        _self = this;
+
+        console.log("L:"+`./i18n/${this.lng}.json`);
+        fetch(`./i18n/${this.lng}.json`)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+
+                var allDom = document.getElementsByTagName("*");
+                for (var i = 0; i < allDom.length; i++) {
+                    var elem = allDom[i];
+                    var key = elem.getAttribute(_self.attribute);
+
+                    if (key != null) {
+                        console.log(key);
+                        elem.innerHTML = data[key];
+                    }
+                }
+
+            })
+            .catch(function (err) {
+                console.log(err);
+            });
+
+    }
+}
