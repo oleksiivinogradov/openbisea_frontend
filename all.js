@@ -468,38 +468,150 @@ async function onResultClick() {
 /**
 * Translation
 */
+
+const enObj =  {
+            
+    httpsWarning:"You can run this example only over HTTPS connection.",
+
+    noWalletWarning1:"No wallet connected. Connect wallet to show accounts and their BNB balances.",
+    noWalletWarning2:"Connect wallet",
+
+    network1:"Connected blockchain:",
+    network2:"Selected account:",
+    network3:"Disconnect wallet",
+
+    auctionTable1:"Name",
+    auctionTable2:"Link",
+    auctionTable3:"Price",
+    auctionTable4:"Deadline",
+    auctionTable5:"Bid amount",
+    auctionTable6:"Allow",
+    auctionTable7:"Bid",
+
+    accountBalance1:"All account balances",
+    accountBalance2:"Address",
+    accountBalance3:"BNB balance",
+    accountBalance4:"Please try to switch between different accounts in your wallet if your wallet supports this functonality.",
+
+    transaction1:"Transaction in progress ...",
+    transaction2:"Check transaction status",
+    openNFTDetails: "Open NFT details",
+
+    walletconnectH1:"Buy OBS token",
+    
+    walletconnectMintNFTH1:"Mint free NFT",
+
+    walletconnectDetailsftH1:"NFT details",
+
+    walletconnectAuctuonsH1: "Auctions",
+
+    purchaseOBS:"Purchase OBS",
+
+    copy:"Copy",
+    approve:"Approve",
+    bid:"Bid",
+    image:"Image",
+
+    whitelistContract:"Whitelist contract",
+    contractNotWhitelisted:"Contract not whitelisted. Please press Whitelist to add.",
+    noWalletConnected:"No wallet connected. Connect wallet to show accounts and their BNB balances.",
+    connectWallet:"Connect wallet",
+    NFTOwnerLoading: "NFT owner loading...",
+    createAuction:"Create auction",
+    cancelAuction:"Cancel auction",
+    loading:"Loading...",
+
+    beforeCSV:"Before upload check CSV format: name;description;artist;public url;image url; external url (optional) ",
+    uploadCSV:"CSV list upload"
+
+
+}
+const ruObj = {
+            
+    // "https-warning":"You can run this example only over HTTPS connection.",
+    
+    httpsWarning:"Вы можете запустить этот пример только через HTTPS-соединение.",
+
+    noWalletWarning1:"Кошелек не подключен. Подключите кошелек чтобы увидить ваши аккаунты и балансы в BNB.",
+    noWalletWarning2:"Подключить кошелек",
+
+    network1:"Сеть:",
+    network2:"Выбранный аккаунт:",
+    network3:"Отключить кошелек",
+
+    auctionTable1:"Название",
+    auctionTable2:"Ссылка",
+    auctionTable3:"Цена",
+    auctionTable4:"Дата завершения",
+    auctionTable5:"Ставка",
+    auctionTable6:"Разрешить",
+    auctionTable7:"Сделать ставку",
+
+    transaction1:"Транзакция обрабатывается ...",
+    transaction2:"Проверить статус транзакции",
+    openNFTDetails: "Открыть NFT детали",
+
+    accountBalance1:"Балансы всех аккаунтов",
+    accountBalance2:"Адрес",
+    accountBalance3:"баланс BNB",
+    accountBalance4:"Можете переключится между аккаунтами, если ваш кошелек поддерживает эту опцию.",
+
+    walletconnectH1:"Купить токен OBS",
+
+    walletconnectMintNFTH1:"Создать свой NFT",
+
+    walletconnectDetailsftH1: "Информация про NFT",
+
+    walletconnectAuctuonsH1: "Аукционы",
+
+    purchaseOBS:"Купить OBS",
+
+    copy:"Копировать",
+    approve:"Подтвердить",
+    bid:"Сделать ставку",
+    image:"Изображение",
+
+    whitelistContract:"Whitelist contract",
+    contractNotWhitelisted:"Contract not whitelisted. Please press Whitelist to add.",
+    noWalletConnected:"Кошелек не подключен. Подключите кошелек чтобы увидить ваши аккаунты и балансы в BNB.",
+    connectWallet:"Подключить кошелек",
+    NFTOwnerLoading: "информация о владельце NFT загружается...",
+    createAuction:"Создать аукцион",
+    cancelAuction:"Отменить аукцион",
+    approveNFT: "Подвтердить NFT",
+    loading:"Загрузка...",
+
+    beforeCSV:"Before upload check CSV format: name;description;artist;public url;image url; external url (optional) ",
+
+    uploadCSV:"загрузить CSV"
+
+
+}
+
 function Translate() {
     //initialization
     this.init = function (attribute, lng) {
         this.attribute = attribute;
         this.lng = lng;
     }
+    const langs = {            
+        en: enObj,
+        ru: ruObj,
+    }
     //translate 
     this.process = function () {
         _self = this;
 
-        console.log("L:"+`./i18n/${this.lng}.json`);
-        fetch(`./i18n/${this.lng}.json`)
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
+        const allDom = document.getElementsByTagName("*");
+        for (let i = 0; i < allDom.length; i++) {
+            let elem = allDom[i];
+            const key = elem.getAttribute(_self.attribute);
 
-                var allDom = document.getElementsByTagName("*");
-                for (var i = 0; i < allDom.length; i++) {
-                    var elem = allDom[i];
-                    var key = elem.getAttribute(_self.attribute);
-
-                    if (key != null) {
-                        console.log(key);
-                        elem.innerHTML = data[key];
-                    }
-                }
-
-            })
-            .catch(function (err) {
-                console.log(err);
-            });
+            if (key != null) {
+                console.log(key+" -> "+langs[`${_self.lng}`].walletconnectH1);
+                elem.innerHTML = langs[`${_self.lng}`][key];
+            }
+        }
 
     }
 }

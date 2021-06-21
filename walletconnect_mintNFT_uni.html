@@ -4,19 +4,32 @@
 <div class="container" style="display: table;">
     <div class="row">
         <div class="col-md-12">
-            <h1>Mint free NFT</h1>
+            
+            
+            <!-- <h1>Mint free NFT</h1> -->
+            <h1 data-tag="walletconnectMintNFTH1"></h1>
+           
+            <!-- parts/https-warning.html -->
+            <!-- <div id="alert-error-https" class="alert alert-danger no_display">
+                You can run this example only over HTTPS connection.
+            </div> -->
+            <div id="alert-error-https" class="alert alert-danger no_display" data-tag="httpsWarning"></div>
 
 
-           <iframe src="./parts/https-warning.html" onload="this.before((this.contentDocument.body||this.contentDocument).children[0]);this.remove()"></iframe>
-
-
-            <div id="prepare">
+            <!-- parts/no-wallet-warning.html -->
+            <!-- <div id="prepare">
                 <p>No wallet connected. Connect wallet to show accounts and their BNB balances.</p>
                 <button id="btn-connect" class="btn btn-primary black_on_yellow">
                     Connect wallet
                 </button>
                 <br><br>
+            </div> -->
+            <div id="prepare">
+                <p data-tag="noWalletWarning1"></p>
+                <button id="btn-connect" class="btn btn-primary black_on_yellow" data-tag="noWalletWarning2"></button>
+                <br><br>
             </div>
+
 
             <div id="connected" class="text-center no_display">
                 <input type="text" id="name" name="name" value="" placeholder="name" style="border-radius: 10px;" />
@@ -41,26 +54,32 @@
                 <input type="text" id="linkToGlb" name="linkToGlb" value="" placeholder="link to 3D glb (Downlodable)" style="border-radius: 10px;" />
                 <br><br>
                 
-                <p id="csvInfo"name="csvInfo">Before upload check CSV format: name;description;artist;public url;image url; external url (optional) </p>
+                <!-- <p id="csvInfo"name="csvInfo">Before upload check CSV format: name;description;artist;public url;image url; external url (optional) </p> -->
+                <p id="csvInfo"name="csvInfo" data-tag="beforeCSV"></p>
 
-                <button id="csvUpload" class="btn btn-primary black_on_yellow" onclick="document.getElementById('fileCsvUpload').click();" > CSV list upload </button>
+                <!-- <button id="csvUpload" class="btn btn-primary black_on_yellow" onclick="document.getElementById('fileCsvUpload').click();" > CSV list upload </button> -->
+                <button id="csvUpload" class="btn btn-primary black_on_yellow" onclick="document.getElementById('fileCsvUpload').click();" data-tag="uploadCSV"> </button>
                 <input type="file" id="fileCsvUpload" onclick="this.value = null" style="display: none;" />
                 <br><br>
 
                 <button id="mint" class="btn btn-primary black_on_yellow"> MintNFT </button>
                 <br>
 
-                <span id="progress" class="clr_yellow no_display"> Transaction in progress ...</span>
+                <!-- <span id="progress" class="clr_yellow no_display"> Transaction in progress ...</span> -->
+                <span id="progress" class="clr_yellow no_display" data-tag="transaction1"></span>
                 <br>
 
                 <div id="resultstrans" class="text-center">
-                    <button id="buy-obs-result" class="btn btn-primary black_on_white no_display"> Check transaction status </button>
-                    <button id="link-to-nft-details" class="btn btn-primary black_on_white no_display"> Open NFT details </button>
+                    <!-- <button id="buy-obs-result" class="btn btn-primary black_on_white no_display"> Check transaction status </button> -->
+                    <button id="buy-obs-result" class="btn btn-primary black_on_white no_display" data-tag="transaction2"> </button>
+                    <!-- <button id="link-to-nft-details" class="btn btn-primary black_on_white no_display"> Open NFT details </button> -->
+                    <button id="link-to-nft-details" class="btn btn-primary black_on_white no_display" data-tag="openNFTDetails">  </button>
                 </div>
 
                 <hr>
 
-                <div id="network">
+                <!-- parts/network.html -->
+                <!-- <div id="network">
                     <p>
                         <strong>Connected blockchain:</strong> <span id="network-name"></span>
                     </p>
@@ -70,11 +89,23 @@
                     <button id="btn-disconnect" class="btn btn-primary black_on_yellow">
                         Disconnect wallet
                     </button>
+                </div> -->
+                <div id="network">
+                    <p>
+                        <strong data-tag="network1"></strong> <span id="network-name"></span>
+                    </p>
+                    <p>
+                        <strong data-tag="network2"></strong> <span id="selected-account"></span>
+                    </p>
+                    <button id="btn-disconnect" class="btn btn-primary black_on_yellow" data-tag="network3">
+                    </button>
                 </div>
+                
 
                 <hr>
 
-                <h3>All account balances</h3>
+               <!-- parts/accounnt balance.html-->
+                <!-- <h3>All account balances</h3>
 
                 <table class="table table-listing">
                     <thead>
@@ -84,8 +115,20 @@
                     <tbody id="accounts">
                     </tbody>
                 </table>
+                <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p> -->
 
-                <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p>
+                <h3 data-tag="accountBalance1" ></h3>
+                <table class="table table-listing">
+                    <thead>
+                        <th data-tag="accountBalance2"></th>
+                        <th data-tag="accountBalance3"></th>
+                    </thead>
+                    <tbody id="accounts">
+                    </tbody>
+                </table>
+                <p data-tag="accountBalance4"></p>
+
+
             </div>
         </div>
     </div>
@@ -120,7 +163,9 @@
         rowResolve: false
     };
 </script>
-<script type="text/javascript" src="https://oleksiivinogradov.github.io/openbisea_frontend/all.js"></script>
+
+<!-- <script type="text/javascript" src="https://oleksiivinogradov.github.io/openbisea_frontend/all.js"></script> -->
+<script type="text/javascript" src="all.js"></script>
 
 <script>
     "use strict";
@@ -153,6 +198,12 @@
      * Setup the orchestra
      */
     function init () {
+
+        const translate = new Translate();
+        const currentLng = options.lang;
+        const attributeName = 'data-tag';
+        translate.init(attributeName, currentLng);
+        translate.process(); 
 
         console.log("Initializing example");
         console.log("WalletConnectProvider is", WalletConnectProvider);
