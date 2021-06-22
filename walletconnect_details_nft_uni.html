@@ -148,7 +148,7 @@ let lang = findGetParameter('lang')
     }
         
     chunkLoad("./parts/https-warning.html",document.querySelector("#https-warning"),lang)
-    chunkLoad("./parts/no-wallet-warning.html",document.querySelector("#no-wallet-warning"),lang)
+    //chunkLoad("./parts/no-wallet-warning.html",document.querySelector("#no-wallet-warning"),lang)
     chunkLoad("./parts/transaction.html",document.querySelector("#transaction"),lang)
     chunkLoad("./parts/network.html",document.querySelector("#network"),lang)
     chunkLoad("./parts/account-balance.html",document.querySelector("#account-balance"),lang)
@@ -165,41 +165,8 @@ let lang = findGetParameter('lang')
 <script>
   "use strict";
 
-  // Unpkg imports
-  const Web3Modal = window.Web3Modal.default;
-  const WalletConnectProvider = window.WalletConnectProvider.default;
-  const Fortmatic = window.Fortmatic;
-  const evmChains = window.evmChains;
-
-  // Web3modal instance
-  let web3Modal
-
-  // Chosen wallet provider given by the dialog window
-  let provider;
-
-  // Address of the selected account
-  let selectedAccount;
-
-  //bscan
-  let resultURL;
-  /**
-   * Setup the orchestra
-   */
-
-  let tokenIDsaved;
-  let contractSaved;
-  let isTestnetSaved;
-
-  let ownerOftoken;
-
   function init() {
 
-
-    const translate = new Translate();
-    const currentLng = options.lang;
-    const attributeName = 'data-tag';
-    translate.init(attributeName, currentLng);
-    translate.process(); 
 
     console.log("Initializing example");
     console.log("WalletConnectProvider is", WalletConnectProvider);
@@ -208,444 +175,16 @@ let lang = findGetParameter('lang')
 
     // Check that the web page is run in a secure context,
     // as otherwise MetaMask won't be available
-    if (location.protocol !== 'https:') {
-      // https://ethereum.stackexchange.com/a/62217/620
-      const alert = document.querySelector("#alert-error-https");
-      alert.style.display = "block";
-      document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
-      return;
-    }
+    isHttps();
 
-    // Tell Web3modal what providers we have available.
-    // Built-in web browser provider (only one can exist as a time)
-    // like MetaMask, Brave or Opera is added automatically by Web3modal
-    const providerOptions = {
-      walletconnect: {
-        package: WalletConnectProvider,
-        options: {
-          // Mikko's test key - don't copy as your mileage may vary
-          infuraId: "bb7b522604e54a2f8ad251e7417b2355",
-        }
-      },
-
-      // fortmatic: {
-      //   package: Fortmatic,
-      //   options: {
-      //     // Mikko's TESTNET api key
-      //     key: "pk_test_391E26A3B43A3350"
-      //   }
-      // }
-    };
-
-    web3Modal = new Web3Modal({
-      cacheProvider: false, // optional
-      providerOptions, // required
-      disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
-    });
 
     console.log("Web3Modal instance is", web3Modal);
     let attempts = 0;
-    let sendOrderStatus = setInterval(async function () {
-      if (window.BinanceChain !== undefined) {
-        clearInterval(sendOrderStatus);
-        console.log("YES window.BinanceChain ");
-
-        const BinanceChain = window.BinanceChain;
-        provider = BinanceChain;
-
-        let currentChainId = BinanceChain.chainId;
-        console.log('currentChainId:' + currentChainId);
-
-        BinanceChain.on('chainChanged', handleChainChanged);
-
-        function handleChainChanged (_chainId) {
-          // We recommend reloading the page, unless you must do otherwise
-          window.location.reload();
-        }
-
-        let currentAccount = null;
-        BinanceChain
-          .request({ method: 'eth_accounts' })
-          .then(handleAccountsChanged)
-          .catch((err) => {
-            // Some unexpected error.
-            // For backwards compatibility reasons, if no accounts are available,
-            // eth_accounts will return an empty array.
-            console.error(err);
-          });
-
-        BinanceChain.on('accountsChanged', handleAccountsChanged);
-
-        function handleAccountsChanged (accounts) {
-          if (accounts.length === 0) {
-            // Binance Chain Wallet is locked or the user has not connected any accounts
-            console.log('Please connect to Binance Chain Wallet.');
-          } else if (accounts[0] !== currentAccount) {
-            currentAccount = accounts[0];
-            console.log('currentAccount:' + currentAccount);
-            fetchAccountData()
-            // Do any other work!
-          }
-        }
-
-        BinanceChain
-          .request({ method: 'eth_requestAccounts' })
-          .then(handleAccountsChanged)
-          .catch((err) => {
-            if (err.code === 4001) {
-              // EIP-1193 userRejectedRequest error
-              // If this happens, the user rejected the connection request.
-              console.log('Please connect to MetaMask.');
-            } else {
-              console.error(err);
-            }
-          });
-
-      } else {
-        console.log("NO window.BinanceChain ");
-        attempts = attempts + 1;
-        if (attempts > 5) {
-          clearInterval(sendOrderStatus);
-        }
-      }
-    }, 5000);
-
+    let sendOrderStatus = setInterval(sendOrderStatusFunction(attempts), 5000);
     updatePage();
   }
 
-  async function updatePage () {
-    let query = getQueryParams(document.location.search);
-    tokenIDsaved = query.tokenID;
-    contractSaved = query.contract;
-    isTestnetSaved = query.testnet;
-    console.log("query is", query);
-    console.log("isTestnetSaved is", isTestnetSaved);
-    let url = 'https://bsc-dataseed1.binance.org';
-    if (isTestnetSaved === '1') {
-      url = 'https://data-seed-prebsc-1-s2.binance.org:8545/'
-    }
-    const web3 = new Web3(new Web3.providers.HttpProvider(url));
-    console.log("Web3 instance is", web3);
-
-    // Get connected chain id from Ethereum node
-    const chainId = await web3.eth.getChainId();
-    console.log("Web3 chainId is", chainId);
-
-    let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
-    if (chainId === 97) nftContractAddress = "0x873783a6c4586c196adfdb15c8acdc576b799938";
-    if (contractSaved !== undefined) {
-      nftContractAddress = contractSaved
-    }
-    const erc721abi = _erc721abi;
-
-    let nftContract = new web3.eth.Contract(erc721abi, nftContractAddress);
-    ownerOftoken = await nftContract.methods.ownerOf(query.tokenID + "").call().catch(function (error) {console.log('ownerOf:' + error)});
-
-    let tokenURI = await nftContract.methods.tokenURI(query.tokenID + "").call().catch(function (error) {console.log('tokenURI:' + error)});
-    console.log("tokenURI is", tokenURI);
-
-    if (tokenURI.includes("ipfs://ipfs/")) {
-      tokenURI = tokenURI.replace('ipfs://ipfs/', 'https://ipfs.io/ipfs/');
-    } else {
-      tokenURI = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
-    }
-    console.log("tokenURI after", tokenURI);
-
-    let response = await fetch(tokenURI);
-    if (response.ok) { // если HTTP-статус в диапазоне 200-299
-      // получаем тело ответа (см. про этот метод ниже)
-      let tokenMetadata = await response.json();
-      console.log("tokenMetadata", tokenMetadata);
-      if (ownerOftoken.toLowerCase() === "0x1d2dfE8D85ddD235cb48a1282d45444543313A5B".toLowerCase()) {
-        document.querySelector("#owner").textContent = "NFT owner is OpenBiSea Auction contract, check auction list bellow.";
-      } else {
-        document.querySelector("#owner").textContent = "NFT owner is " + ownerOftoken;
-      }
-      console.log("ownerOftoken", ownerOftoken);
-      if (tokenMetadata.media !== undefined) {
-        document.querySelector("#threed").style.display = "inline-block";
-        document.querySelector("#threed").src = tokenMetadata.media.uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
-      }
-        if (tokenMetadata.image !== undefined) {
-          tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
-          document.querySelector("#image").src = tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
-        }
-
-      document.querySelector("#name").value = tokenMetadata.name;
-      if (tokenMetadata.description !== undefined) document.querySelector("#desc").value = tokenMetadata.description;
-      else document.querySelector("#desc").style.display = "none"
-
-      if (tokenMetadata.properties !== undefined) document.querySelector("#artist").value = tokenMetadata.properties.artist;
-      else document.querySelector("#artist").style.display = "none"
-      if (tokenMetadata.properties !== undefined) document.querySelector("#public_profile_link").value = tokenMetadata.properties.public_profile_link;
-      else document.querySelector("#public_profile_link").style.display = "none"
-      // document.querySelector("#description").textContent = tokenMetadata.description;
-      console.log("document.querySelector(#name)", document.querySelector("#description"));
-
-    }
-  }
-
-  let auctionsNormalized = {};
-
-  async function onCreateClick () {
-    let url = "https://openbisea.io/auctioncreate-v2?tokenID=" + tokenIDsaved;
-    if (contractSaved !== undefined) url = url + "&contract=" + contractSaved;
-    window.open(url, '_blank').focus();
-  }
-
-  async function onCancelClick () {
-    document.querySelector("#progress").style.display = "block";
-    document.querySelector("#cancel-auction").disabled = true;
-
-    let countDots = 0;
-    let sendOrderStatus = setInterval(async function () {
-      let phrase = "Transaction in progress " + ".".repeat(countDots);
-      document.querySelector("#progress").textContent = phrase;
-      countDots++;
-      if (countDots === 4) countDots = 0;
-    }, 1000);
-    const web3 = new Web3(provider);
-    const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-      document.querySelector("#progress").textContent = "We support only BSC mainnet";
-      document.querySelector("#cancel-auction").disabled = false;
-      return;
-    }
-
-    const openbiseaABI = _openbiseaABI;
-    let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
-    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-    const openbiseaContract = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-    let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
-    if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
-    if (contractSaved !== undefined) {
-      nftContractAddress = contractSaved
-    }
-    let cancelResult = await openbiseaContract.methods.cancelAuction(nftContractAddress, tokenIDsaved + "", false).send({
-      from: selectedAccount,
-      gas: 500000
-    }).catch((err) => {
-      console.log('err->' + JSON.stringify(err));
-      document.querySelector("#progress").textContent = err.message;
-      document.querySelector("#cancel-auction").disabled = false;
-    });
-
-    if (cancelResult !== undefined) {
-      console.log('cancelResult:', cancelResult.transactionHash);
-      // element.disabled = false;
-      document.querySelector("#buy-obs-result").style.display = "inline-block";
-      resultURL = "https://bscscan.com/tx/" + cancelResult.transactionHash
-      if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + cancelResult.transactionHash
-      document.querySelector("#progress").style.display = "none";
-      document.querySelector("#cancel-auction").disabled = false;
-    } else {
-      // document.querySelector("#obsamount").textContent = "Result undefined";
-      document.querySelector("#progress").style.display = "none";
-    }
-    clearInterval(sendOrderStatus);
-  }
-
-  async function onOpenImageClick (element) {
-    console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
-    window.open(auctionsNormalized[element.parentNode.parentNode.rowIndex].image, '_blank').focus();
-  }
-
-  async function onAllowClick (element) {
-    console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
-    const auctionInfo = auctionsNormalized[element.parentNode.parentNode.rowIndex];
-    document.querySelector("#progress").style.display = "block";
-
-    let countDots = 0;
-    let sendOrderStatus = setInterval(async function () {
-      let phrase = "Transaction in progress " + ".".repeat(countDots);
-      document.querySelector("#progress").textContent = phrase;
-      countDots++;
-      if (countDots === 4) countDots = 0;
-    }, 1000);
-    const web3 = new Web3(provider);
-    const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-      document.querySelector("#progress").textContent = "We support only BSC mainnet";
-      element.disabled = true;
-      // document.querySelector("#progress").style.display = "none";
-      return;
-    }
-    let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
-    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-
-    let busdAddress = '0xe9e7cea3dedca5984780bafc599bd69add087d56';
-    if (chainId === 97) busdAddress = "0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47";
-
-    const busdABI = _busdABI;
-    const busd = new web3.eth.Contract(JSON.parse(busdABI), busdAddress);
-
-    const amountText = element.parentNode.parentNode.children[4].children[0].value;
-    const amountDouble = parseFloat(amountText);
-    if (amountDouble <= auctionInfo.priceDouble) {
-      document.querySelector("#progress").textContent = "must be more than last bid";
-      element.disabled = true;
-      // document.querySelector("#progress").style.display = "none";
-      return;
-    }
-    element.disabled = true;
-    const purchaseAmount = Number(parseFloat(amountText) * (10 ** 18)).toFixed(0) + '';
-
-    let approveResult = await busd.methods.approve(openbiseaAddress, purchaseAmount).send({
-      from: selectedAccount
-    }).catch((err) => {
-      console.log('err->' + JSON.stringify(err));
-      document.querySelector("#progress").textContent = err.message;
-    });
-    if (approveResult !== undefined) {
-      console.log('bidResult:', approveResult.transactionHash);
-      element.disabled = false;
-      document.querySelector("#buy-obs-result").style.display = "inline-block";
-      resultURL = "https://bscscan.com/tx/" + approveResult.transactionHash
-      if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + approveResult.transactionHash
-      document.querySelector("#progress").style.display = "none";
-      element.parentNode.parentNode.children[6].children[0].removeAttribute("disabled");
-      element.style.display = "none";
-    } else {
-      // document.querySelector("#obsamount").textContent = "Result undefined";
-      document.querySelector("#progress").style.display = "none";
-    }
-    clearInterval(sendOrderStatus);
-
-  }
-
-  async function onBidClick (element) {
-    // var element = event.target || event.srcElement;
-    console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
-    const auctionInfo = auctionsNormalized[element.parentNode.parentNode.rowIndex];
-
-    document.querySelector("#progress").style.display = "block";
-
-    let countDots = 0;
-    let sendOrderStatus = setInterval(async function () {
-      let phrase = "Transaction in progress " + ".".repeat(countDots);
-      document.querySelector("#progress").textContent = phrase;
-      countDots++;
-      if (countDots === 4) countDots = 0;
-    }, 1000);
-    const web3 = new Web3(provider);
-    const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-      document.querySelector("#progress").textContent = "We support only BSC mainnet";
-      element.disabled = true;
-      // document.querySelector("#progress").style.display = "none";
-      return;
-    }
-    let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
-    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-    const openbiseaABI = _openbiseaABI;
-    const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-
-    console.log("1", element.parentNode.parentNode);
-    console.log("2", element.parentNode.parentNode.children[4]);
-    console.log("3", element.parentNode.parentNode.children[4].children[0]);
-
-    const amountText = element.parentNode.parentNode.children[4].children[0].value;
-    const amountDouble = parseFloat(amountText);
-    if (amountDouble <= auctionInfo.priceDouble) {
-      document.querySelector("#progress").textContent = "must be more than last bid";
-      element.disabled = true;
-      // document.querySelector("#progress").style.display = "none";
-      return;
-    }
-    element.disabled = true;
-
-    let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
-    if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
-    if (contractSaved !== undefined) {
-      nftContractAddress = contractSaved
-    }
-    const purchaseAmount = Number(parseFloat(amountText) * (10 ** 18)).toFixed(0) + '';
-    let bidResult
-    console.log("auctionInfo", auctionInfo);
-    console.log("purchaseAmount", purchaseAmount);
-    console.log("amountText", amountText);
-    console.log("element.parentNode", element.parentNode);
-    console.log("element.parentNode.parentNode", element.parentNode.parentNode);
-    if (auctionInfo.isUSD === true) {
-      // NEED allowance.
-      bidResult = await openbisea.methods.bidUSD(nftContractAddress, auctionInfo.tokenID + "", purchaseAmount, false).send({
-        from: selectedAccount,
-        gas: 500000
-      }).catch((err) => {
-        console.log('err->' + JSON.stringify(err));
-        document.querySelector("#progress").textContent = err.message;
-      });
-    } else {
-      bidResult = await openbisea.methods.bid(nftContractAddress, auctionInfo.tokenID + "", false).send({
-        from: selectedAccount,
-        value: purchaseAmount,
-        gas: 500000
-      }).catch((err) => {
-        console.log('err->' + JSON.stringify(err));
-        document.querySelector("#progress").textContent = err.message;
-      });
-    }
-
-    if (bidResult !== undefined) {
-      console.log('bidResult:', bidResult.transactionHash);
-      element.disabled = false;
-      document.querySelector("#buy-obs-result").style.display = "inline-block";
-      resultURL = "https://bscscan.com/tx/" + bidResult.transactionHash
-      if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + bidResult.transactionHash
-      document.querySelector("#progress").style.display = "none";
-    } else {
-      // document.querySelector("#obsamount").textContent = "Result undefined";
-      document.querySelector("#progress").style.display = "none";
-    }
-    clearInterval(sendOrderStatus);
-  }
-
-  async function onWhitelist () {
-    // var element = event.target || event.srcElement;
-
-    document.querySelector("#progress").style.display = "block";
-
-    let countDots = 0;
-    let sendOrderStatus = setInterval(async function () {
-      let phrase = "Transaction in progress " + ".".repeat(countDots);
-      document.querySelector("#progress").textContent = phrase;
-      countDots++;
-      if (countDots === 4) countDots = 0;
-    }, 1000);
-    const web3 = new Web3(provider);
-    const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-      document.querySelector("#progress").textContent = "We support only BSC mainnet";
-      element.disabled = true;
-      // document.querySelector("#progress").style.display = "none";
-      return;
-    }
-    let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
-    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-    const openbiseaABI = _openbiseaABI;
-    const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-
-    let whitelistResult = await openbisea.methods.whitelistContractCreator(contractSaved).send({
-        from: selectedAccount,
-        gas: 500000,
-        value: "88800000000000000"
-      }).catch((err) => {
-        console.log('err->' + JSON.stringify(err));
-        document.querySelector("#progress").textContent = err.message;
-      });
-
-    if (whitelistResult !== undefined) {
-      console.log('whitelistResult:', whitelistResult.transactionHash);
-      document.querySelector("#buy-obs-result").style.display = "inline-block";
-      resultURL = "https://bscscan.com/tx/" + whitelistResult.transactionHash
-      if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + whitelistResult.transactionHash
-      document.querySelector("#progress").style.display = "none";
-    } else {
-      // document.querySelector("#obsamount").textContent = "Result undefined";
-      document.querySelector("#progress").style.display = "none";
-    }
-    clearInterval(sendOrderStatus);
-  }
+  
 
   /**
    * Main entry point.
@@ -655,7 +194,7 @@ let lang = findGetParameter('lang')
     // document.querySelector("#btn-connect").addEventListener("click", onConnect);
     // document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
     document.querySelector("#btn-whitelist").addEventListener("click", onWhitelist);
-    document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
+    //document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
     document.querySelector("#create-auction").addEventListener("click", onCreateClick);
     document.querySelector("#cancel-auction").addEventListener("click", onCancelClick);
   });
@@ -667,6 +206,10 @@ let lang = findGetParameter('lang')
         if( event.target.id == 'btn-disconnect' ) {
             onDisconnect()
         };
+        if( event.target.id == 'buy-obs-result' ) {
+          onResultClick()
+        };
+        
     } );
 
   window.onload = function () {
