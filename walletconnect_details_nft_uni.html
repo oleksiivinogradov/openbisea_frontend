@@ -1,3 +1,6 @@
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
       integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossOrigin="anonymous">
 <link type="text/css" rel="stylesheet" href="https://oleksiivinogradov.github.io/openbisea_frontend/all.css">
@@ -12,29 +15,10 @@
       <div class="sharethis-inline-share-buttons"></div>
 
 
-      <!-- <h1>NFT details</h1> -->
       <h1 data-tag="walletconnectMintNFTH1"></h1>
       
       <!-- parts/https-warning.html -->
-      <!-- <div id="alert-error-https" class="alert alert-danger no_display">
-          You can run this example only over HTTPS connection.
-      </div> -->
-      <div id="alert-error-https" class="alert alert-danger no_display" data-tag="httpsWarning"></div>
-
-
-      <!-- parts/no-wallet-warning.html -->
-      <!-- <div id="prepare">
-          <p>No wallet connected. Connect wallet to show accounts and their BNB balances.</p>
-          <button id="btn-connect" class="btn btn-primary black_on_yellow">
-              Connect wallet
-          </button>
-          <br><br>
-      </div> -->
-      <div id="prepare">
-          <p data-tag="noWalletWarning1"></p>
-          <button id="btn-connect" class="btn btn-primary black_on_yellow" data-tag="noWalletWarning2"></button>
-          <br><br>
-      </div>
+      <div id="https-warning"></div>
 
       
       <img id="image" src="">
@@ -46,7 +30,6 @@
       <textarea type="text" id="name" readonly="readonly" name="name" value=""></textarea>
       <br><br>
 
-      <!--<textarea id="desc" name="desc" readonly="readonly" placeholder="description">Loading... </textarea>-->
       <textarea id="desc" name="desc" readonly="readonly" placeholder="description" data-tag="loading"></textarea>
       <br><br>
 
@@ -56,28 +39,16 @@
       <textarea type="text" id="public_profile_link" class="custom_style2" name="public_profile_link" value="" readonly="readonly" placeholder="Public profile link"></textarea>
       <br><br>
 
-      <!-- <p id="owner">NFT owner loading...</p> -->
       <p id="owner" data-tag="NFTOwnerLoading"></p>
 
-      <!-- <button id="create-auction" class="btn btn-primary black_on_yellow no_display">
-        Create auction
-      </button> -->
+
       <button id="create-auction" class="btn btn-primary black_on_yellow no_display" data-tag="createAuction">
       </button>
 
-      <!-- <button id="cancel-auction" class="btn btn-primary black_on_yellow no_display">
-        Cancel auction
-      </button> -->
+
       <button id="cancel-auction" class="btn btn-primary black_on_yellow no_display" data-tag="cancelAuction">
       </button>
 
-      <!-- <div id="prepare">
-        <p>No wallet connected. Connect wallet to show accounts and their BNB balances.</p>
-        <button id="btn-connect" class="btn btn-primary black_on_yellow">
-          Connect wallet
-        </button>
-        <br><br>
-      </div> -->
 
       <div id="prepare">
         <p data-tag="noWalletConnected"></p>
@@ -86,13 +57,7 @@
         <br><br>
       </div>
 
-      <!-- <div id="whitelist" class="text-center no_display">
-        <p>Contract not whitelisted. Please press Whitelist to add.</p>
-        <button id="btn-whitelist" class="btn btn-primary black_on_yellow">
-          Whitelist contract
-        </button>
-        <br><br>
-      </div> -->
+
       <div id="whitelist" class="text-center no_display">
         <p data-tag="contractNotWhitelisted"></p>
         <button id="btn-whitelist" class="btn btn-primary black_on_yellow" data-tag="whitelistcontract"></button>
@@ -100,100 +65,24 @@
       </div>
 
       <div id="connected" class="text-center no_display">
-        <!-- parts/auctions-table.html -->
-        <!-- <table class="table table-listing">
-          <thead>
-            <th class="text-center">Name</th>
-            <th class="text-center">Link</th>
-            <th class="text-center">Price</th>
-            <th class="text-center">Deadline</th>
-            <th class="text-center">Bid amount</th>
-            <th class="text-center">Allow</th>
-            <th class="text-center">Bid</th>
-          </thead>
-          <tbody id="auctions">
-          </tbody>
-        </table> -->
-        <table class="table table-listing">
-          <thead>
-            <th class="text-center" data-tag="auctionTable1"></th>
-            <th class="text-center" data-tag="auctionTable2"></th>
-            <th class="text-center" data-tag="auctionTable3"></th>
-            <th class="text-center" data-tag="auctionTable4"></th>
-            <th class="text-center" data-tag="auctionTable5"></th>
-            <th class="text-center" data-tag="auctionTable6"></th>
-            <th class="text-center" data-tag="auctionTable7"></th>
-          </thead>
-          <tbody id="auctions">
-          </tbody>
-        </table>
 
+
+        <!-- parts/auctions-table.html -->
+        <div id="auctions-table"></div>
 
         <!-- parts/transaction -->
-        <!-- <span id="progress" class="clr_yellow no_display"> Transaction in progress ...</span>
-        <br>
-
-        <div id="resultstrans" class="text-center">
-          <button id="buy-obs-result" class="btn btn-primary black_on_white no_display"> Check transaction status </button>
-        </div> -->
-
-        <span id="progress" class="clr_yellow no_display" date-tag="transaction1"> </span>
-        <br>
-
-        <div id="resultstrans" class="text-center">
-          <button id="buy-obs-result" class="btn btn-primary black_on_white no_display" date-tag="transaction1"> </button>
-        </div>
+        <div id="transaction"></div>
 
         <hr>
 
         <!-- parts/network.html -->
-          <!-- <div id="network">
-              <p>
-                  <strong>Connected blockchain:</strong> <span id="network-name"></span>
-              </p>
-              <p>
-                  <strong>Selected account:</strong> <span id="selected-account"></span>
-              </p>
-              <button id="btn-disconnect" class="btn btn-primary black_on_yellow">
-                  Disconnect wallet
-              </button>
-          </div> -->
-          <div id="network">
-            <p>
-                <strong data-tag="network1"></strong> <span id="network-name"></span>
-            </p>
-            <p>
-                <strong data-tag="network2"></strong> <span id="selected-account"></span>
-            </p>
-            <button id="btn-disconnect" class="btn btn-primary black_on_yellow" data-tag="network3">
-            </button>
-        </div>
+        <div id="network"></div>
 
         <hr>
 
-       <!-- parts/accounnt balance.html-->
-        <!-- <h3>All account balances</h3>
+        <!-- parts/account-balance.html-->
+        <div id="account-balance"></div>
 
-        <table class="table table-listing">
-            <thead>
-                <th>Address</th>
-                <th>BNB balance</th>
-            </thead>
-            <tbody id="accounts">
-            </tbody>
-        </table>
-        <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p> -->
-
-        <h3 data-tag="accountBalance1" ></h3>
-        <table class="table table-listing">
-            <thead>
-                <th data-tag="accountBalance2"></th>
-                <th data-tag="accountBalance3"></th>
-            </thead>
-            <tbody id="accounts">
-            </tbody>
-        </table>
-        <p data-tag="accountBalance4"></p>
 
 
       </div>
@@ -246,15 +135,32 @@
 <script type="text/javascript"
         src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+
+<!-- <script type="text/javascript" src="https://oleksiivinogradov.github.io/openbisea_frontend/all.js"></script> -->
+<script type="text/javascript" src="all.js"></script>
+
+
 <script>
+
+let lang = findGetParameter('lang')
+    if(lang==null){
+        lang = 'en'
+    }
+        
+    chunkLoad("./parts/https-warning.html",document.querySelector("#https-warning"),lang)
+    chunkLoad("./parts/no-wallet-warning.html",document.querySelector("#no-wallet-warning"),lang)
+    chunkLoad("./parts/transaction.html",document.querySelector("#transaction"),lang)
+    chunkLoad("./parts/network.html",document.querySelector("#network"),lang)
+    chunkLoad("./parts/account-balance.html",document.querySelector("#account-balance"),lang)
+    chunkLoad("./parts/auctions-table.html",document.querySelector("#auctions-table"),lang)
+
   var options = {
     page: 'wc_details_nft',
-    lang: 'en',
+    lang: lang,
     rowResolve: true
   };
 </script>
-<!-- <script type="text/javascript" src="https://oleksiivinogradov.github.io/openbisea_frontend/all.js"></script> -->
-<script type="text/javascript" src="all.js"></script>
+
 
 <script>
   "use strict";
@@ -746,13 +652,22 @@
    */
   window.addEventListener('load', async () => {
     //init();
-    document.querySelector("#btn-connect").addEventListener("click", onConnect);
-    document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
+    // document.querySelector("#btn-connect").addEventListener("click", onConnect);
+    // document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
     document.querySelector("#btn-whitelist").addEventListener("click", onWhitelist);
     document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
     document.querySelector("#create-auction").addEventListener("click", onCreateClick);
     document.querySelector("#cancel-auction").addEventListener("click", onCancelClick);
   });
+
+  document.body.addEventListener( 'click', function ( event ) {
+        if( event.target.id == 'btn-connect' ) {
+            onConnect()
+        };
+        if( event.target.id == 'btn-disconnect' ) {
+            onDisconnect()
+        };
+    } );
 
   window.onload = function () {
     init();

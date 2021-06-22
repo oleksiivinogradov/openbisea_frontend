@@ -1,25 +1,24 @@
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link type="text/css" rel="stylesheet" href="https://oleksiivinogradov.github.io/openbisea_frontend/all.css">
 
 <div class="container" style="display: table;">
     <div class="row">
         <div class="col-md-12">
-            <h1>Ethereum - Binance Smart chain bridge</h1>
+            <h1 data-tag="EthereumBSCBridge"></h1>
 
-            <div id="alert-error-https" class="alert alert-danger no_display">
-                You can run this example only over HTTPS connection.
-            </div>
+            <!-- parts/https-warning.html -->
+            <div id="https-warning"></div>
 
-            <div id="prepare">
-                <p>No wallet connected. Connect wallet to show accounts and their BNB/ETH balances.</p>
-                <button id="btn-connect" class="btn btn-primary black_on_yellow">
-                    Connect wallet
-                </button>
-                <br><br>
-            </div>
+
+            <!-- parts/no-wallet-warning.html -->
+            <div id="no-wallet-warning"></div>
+
+
 
             <div id="connected" class="text-center no_display">
-                <h3>Please check if ETH asset contract registered first:</h3>
+                <h3 data-tag="pleaseCheckETH"></h3>
 
                 <input type="text" id="contract" name="contract" value="" placeholder="contract address" />
                 <br><br>
@@ -27,18 +26,16 @@
                 <input type="number" id="type" name="type" value="" style="width:230px;" placeholder="asset type 20 or 721 or 1155" />
                 <br><br>
 
-                <button id="check" class="btn btn-primary black_on_yellow" onclick="onCheck()">
-                    Check
+                <button id="check" class="btn btn-primary black_on_yellow" data-tag="check" onclick="onCheck()">
                 </button>
 
-                <button id="register" class="btn btn-primary black_on_yellow" onclick="onRegister()">
-                    Register contract
+                <button id="register" class="btn btn-primary black_on_yellow" data-tag="registerContract" onclick="onRegister()">
                 </button>
                 <br>
 
-                <span id="checkres" class="clr_yellow"> Contract not checked in.</span>
+                <span id="checkres" class="clr_yellow" data-tag="contractNotChecked"> </span>
 
-                <span class="clr_yellow"> Please choose asset to convert depends from type:</span>
+                <span class="clr_yellow" data-tag="chooseAssetToConvert"> </span>
 
                 <input type="number" id="amount" name="amount" value="" style="width:230px;" placeholder="ERC20/ERC1155 amount (1 for ERC721)"/>
                 <br><br>
@@ -48,49 +45,33 @@
 
                 <hr>
 
-                <h3>Convert from Ethereum to Binance Smart Chain:</h3>
-                <button id="approve" class="btn btn-primary black_on_yellow"> Approve ETH </button>
-                <button id="convert" class="btn btn-primary black_on_yellow"> Convert ETH </button>
+                <h3 data-tag="convertETHtoBSC"></h3>
+                <button id="approve" class="btn btn-primary black_on_yellow" data-tag="approveETH"> </button>
+                <button id="convert" class="btn btn-primary black_on_yellow" data-tag="convertETH"> </button>
                 <br>
                 
                 <hr>
 
-                <h3>Convert back from Binance Smart Chain to Ethereum</h3>
-                <button id="approveBSC" class="btn btn-primary black_on_yellow"> Approve BSC </button>
-                <button id="convertBSC" class="btn btn-primary black_on_yellow"> Convert BSC </button>
-                <span id="progress" class="clr_yellow no_display"> Transaction in progress ...</span>
-                <br>
-
-                <div id="resultstrans" class="text-center">
-                    <button id="buy-obs-result" class="btn btn-primary black_on_white no_display"> Check transaction status </button>
-                </div>
+                <h3 data-tag="convertBSCtoETH"></h3>
+                <button id="approveBSC" class="btn btn-primary black_on_yellow" data-tag="approveBSC">  </button>
+                <button id="convertBSC" class="btn btn-primary black_on_yellow" data-tag="convertBSC">  </button>
+                
+                
+                <!-- parts/transaction -->
+                <div id="transaction"></div>
 
                 <hr>
 
-                <div id="network">
-                    <p>
-                        <strong>Connected blockchain:</strong> <span id="network-name"></span>
-                    </p>
-                    <p>
-                        <strong>Selected account:</strong> <span id="selected-account"></span>
-                    </p>
-                    <button id="btn-disconnect" class="btn btn-primary black_on_yellow">
-                        Disconnect wallet
-                    </button>
-                </div>
+                
+                <!-- parts/network.html -->
+                <div id="network"></div>
+        
+                <hr>
+        
+                <!-- parts/account-balance.html-->
+                <div id="account-balance"></div>
 
-                <h3>All account balances</h3>
 
-                <table class="table table-listing">
-                    <thead>
-                        <th>Address</th>
-                        <th>BNB/ETH balance</th>
-                    </thead>
-                    <tbody id="accounts">
-                    </tbody>
-                </table>
-
-                <p>Please try to switch between different accounts in your wallet if your wallet supports this functonality.</p>
             </div>
         </div>
     </div>
@@ -118,14 +99,33 @@
 <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+
+
+<!-- <script type="text/javascript" src="https://oleksiivinogradov.github.io/openbisea_frontend/all.js"></script> -->
+<script type="text/javascript" src="all.js"></script>
+
 <script>
+
+
+let lang = findGetParameter('lang')
+    if(lang==null){
+        lang = 'en'
+    }
+        
+    chunkLoad("./parts/https-warning.html",document.querySelector("#https-warning"),lang)
+    chunkLoad("./parts/no-wallet-warning.html",document.querySelector("#no-wallet-warning"),lang)
+    chunkLoad("./parts/network.html",document.querySelector("#network"),lang)
+    chunkLoad("./parts/transaction.html",document.querySelector("#transaction"),lang)
+    chunkLoad("./parts/account-balance.html",document.querySelector("#account-balance"),lang)
+
+
     var options = {
         page: 'wc_bridge',
-        lang: 'en',
+        lang: lang,
         rowResolve: false
     };
 </script>
-<script type="text/javascript" src="https://oleksiivinogradov.github.io/openbisea_frontend/all.js"></script>
+
 
 <script>
     "use strict";
@@ -151,6 +151,14 @@
      * Setup the orchestra
      */
     function init() {
+
+        const translate = new Translate();
+        const currentLng = options.lang;
+        const attributeName = 'data-tag';
+        translate.init(attributeName, currentLng);
+        translate.process(); 
+
+
         console.log("Initializing example");
         console.log("WalletConnectProvider is", WalletConnectProvider);
         console.log("Fortmatic is", Fortmatic);
@@ -585,8 +593,8 @@ isHttps();
 
     window.addEventListener('load', async () => {
         init();
-        document.querySelector("#btn-connect").addEventListener("click", onConnect);
-        document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
+        //document.querySelector("#btn-connect").addEventListener("click", onConnect);
+        //document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
         document.querySelector("#approve").addEventListener("click", onApproveETH);
         document.querySelector("#convert").addEventListener("click", onConvertETH);
         document.querySelector("#register").addEventListener("click", onRegister);
@@ -598,7 +606,17 @@ isHttps();
         document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
     });
 
+    document.body.addEventListener( 'click', function ( event ) {
+        if( event.target.id == 'btn-connect' ) {
+            onConnect()
+        };
+        if( event.target.id == 'btn-disconnect' ) {
+            onDisconnect()
+        };
+    } );
+
+
     window.onload = function () {
-        init();
+        //init();
     }
 </script>

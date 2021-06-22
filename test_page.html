@@ -1,3 +1,5 @@
+
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link type="text/css" rel="stylesheet" href="https://oleksiivinogradov.github.io/openbisea_frontend/all.css">
 
@@ -6,28 +8,23 @@
     <div class="row">
         <div class="col-md-12">
             
-            
-            
-            <!-- <iframe src="./parts/network.html"></iframe> -->
 
-            <iframe src="https://oleksiivinogradov.github.io/openbisea_frontend/parts/auctions-table.html" onload="this.before((this.contentDocument.body||this.contentDocument).children[0]);this.remove()"></iframe>
-            
-           
-
-
+            <!-- <iframe src="https://oleksiivinogradov.github.io/openbisea_frontend/parts/auctions-table.html" onload="this.before((this.contentDocument.body||this.contentDocument).children[0]);this.remove()"></iframe> -->
+            <div id="myIframe"></div>
+            <div id="myIframe2"></div>
 
         </div>
     </div>
 
     <!-- We use simple <template> templating for the example -->
-    <div id="templates" class="no_display">
+    <!-- <div id="templates" class="no_display">
         <template id="template-balance">
             <tr>
                 <th class="address"></th>
                 <td class="balance"></td>
             </tr>
         </template>
-    </div>
+    </div> -->
 </div>
 
 
@@ -37,271 +34,282 @@
 <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
-<script>
+<!-- <script>
     var options = {
         page: 'wc',
         lang: 'ru',
         rowResolve: false
     };
-</script>
+</script> -->
 
+<!-- <script type="text/javascript" src="all-min.js"></script> -->
 <script type="text/javascript" src="all.js"></script>
 
 
 <script>
+
     "use strict";
 
-    /**
-     * Example JavaScript code that interacts with the page and Web3 wallets
-     */
+    let lang = findGetParameter('lang')
+    if(lang==null){
+        lang = 'en'
+    }
 
-        // Unpkg imports
-    const Web3Modal = window.Web3Modal.default;
-    const WalletConnectProvider = window.WalletConnectProvider.default;
-    const Fortmatic = window.Fortmatic;
-    const evmChains = window.evmChains;
+    chunkLoad("./parts/auctions-table.html",document.querySelector("#myIframe"),lang)
+    chunkLoad("./parts/auctions-table.html",document.querySelector("#myIframe2"),lang)
 
-    // Web3modal instance
-    let web3Modal
 
-    // Chosen wallet provider given by the dialog window
-    let provider;
+    // /**
+    //  * Example JavaScript code that interacts with the page and Web3 wallets
+    //  */
 
-    // Address of the selected account
-    let selectedAccount;
+    //     // Unpkg imports
+    // const Web3Modal = window.Web3Modal.default;
+    // const WalletConnectProvider = window.WalletConnectProvider.default;
+    // const Fortmatic = window.Fortmatic;
+    // const evmChains = window.evmChains;
 
-    //bscan
-    let resultURL;
-    /**
-     * Setup the orchestra
-     */
-    function init () {
+    // // Web3modal instance
+    // let web3Modal
 
-        const translate = new Translate();
-        const currentLng = options.lang;
-        const attributeName = 'data-tag';
-        translate.init(attributeName, currentLng);
-        translate.process(); 
+    // // Chosen wallet provider given by the dialog window
+    // let provider;
 
-        console.log("Initializing example");
-        console.log("WalletConnectProvider is", WalletConnectProvider);
-        console.log("Fortmatic is", Fortmatic);
-        console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
+    // // Address of the selected account
+    // let selectedAccount;
 
-        // Check that the web page is run in a secure context,
-        // as otherwise MetaMask won't be available
-        if (location.protocol !== 'https:') {
-            // https://ethereum.stackexchange.com/a/62217/620
-            const alert = document.querySelector("#alert-error-https");
-            alert.style.display = "block";
-            document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
-            return;
-        }
+    // //bscan
+    // let resultURL;
+    // /**
+    //  * Setup the orchestra
+    //  */
+    // function init () {
 
-        // Tell Web3modal what providers we have available.
-        // Built-in web browser provider (only one can exist as a time)
-        // like MetaMask, Brave or Opera is added automatically by Web3modal
-        const providerOptions = {
-            walletconnect: {
-                package: WalletConnectProvider,
-                options: {
-                    // Mikko's test key - don't copy as your mileage may vary
-                    infuraId: "bb7b522604e54a2f8ad251e7417b2355",
-                }
-            },
+    //     const translate = new Translate();
+    //     const currentLng = options.lang;
+    //     const attributeName = 'data-tag';
+    //     translate.init(attributeName, currentLng);
+    //     translate.process(); 
 
-            // fortmatic: {
-            //   package: Fortmatic,
-            //   options: {
-            //     // Mikko's TESTNET api key
-            //     key: "pk_test_391E26A3B43A3350"
-            //   }
-            // }
-        };
+    //     console.log("Initializing example");
+    //     console.log("WalletConnectProvider is", WalletConnectProvider);
+    //     console.log("Fortmatic is", Fortmatic);
+    //     console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
 
-        web3Modal = new Web3Modal({
-            cacheProvider: false, // optional
-            providerOptions, // required
-            disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
-        });
+    //     // Check that the web page is run in a secure context,
+    //     // as otherwise MetaMask won't be available
+    //     if (location.protocol !== 'https:') {
+    //         // https://ethereum.stackexchange.com/a/62217/620
+    //         const alert = document.querySelector("#alert-error-https");
+    //         alert.style.display = "block";
+    //         document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+    //         return;
+    //     }
 
-        console.log("Web3Modal instance is", web3Modal);
-        let attempts = 0;
-        let sendOrderStatus = setInterval(async function () {
-            if (window.BinanceChain !== undefined) {
-                clearInterval(sendOrderStatus);
-                console.log("YES window.BinanceChain ");
+    //     // Tell Web3modal what providers we have available.
+    //     // Built-in web browser provider (only one can exist as a time)
+    //     // like MetaMask, Brave or Opera is added automatically by Web3modal
+    //     const providerOptions = {
+    //         walletconnect: {
+    //             package: WalletConnectProvider,
+    //             options: {
+    //                 // Mikko's test key - don't copy as your mileage may vary
+    //                 infuraId: "bb7b522604e54a2f8ad251e7417b2355",
+    //             }
+    //         },
 
-                const BinanceChain = window.BinanceChain;
-                provider = BinanceChain;
+    //         // fortmatic: {
+    //         //   package: Fortmatic,
+    //         //   options: {
+    //         //     // Mikko's TESTNET api key
+    //         //     key: "pk_test_391E26A3B43A3350"
+    //         //   }
+    //         // }
+    //     };
 
-                let currentChainId = BinanceChain.chainId;
-                console.log('currentChainId:' + currentChainId);
+    //     web3Modal = new Web3Modal({
+    //         cacheProvider: false, // optional
+    //         providerOptions, // required
+    //         disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
+    //     });
 
-                BinanceChain.on('chainChanged', handleChainChanged);
+    //     console.log("Web3Modal instance is", web3Modal);
+    //     let attempts = 0;
+    //     let sendOrderStatus = setInterval(async function () {
+    //         if (window.BinanceChain !== undefined) {
+    //             clearInterval(sendOrderStatus);
+    //             console.log("YES window.BinanceChain ");
 
-                function handleChainChanged(_chainId) {
-                    // We recommend reloading the page, unless you must do otherwise
-                    window.location.reload();
-                }
-                let currentAccount = null;
-                BinanceChain
-                    .request({ method: 'eth_accounts' })
-                    .then(handleAccountsChanged)
-                    .catch((err) => {
-                        // Some unexpected error.
-                        // For backwards compatibility reasons, if no accounts are available,
-                        // eth_accounts will return an empty array.
-                        console.error(err);
-                    });
+    //             const BinanceChain = window.BinanceChain;
+    //             provider = BinanceChain;
 
-                BinanceChain.on('accountsChanged', handleAccountsChanged);
+    //             let currentChainId = BinanceChain.chainId;
+    //             console.log('currentChainId:' + currentChainId);
 
-                function handleAccountsChanged(accounts) {
-                    if (accounts.length === 0) {
-                        // Binance Chain Wallet is locked or the user has not connected any accounts
-                        console.log('Please connect to Binance Chain Wallet.');
-                    } else if (accounts[0] !== currentAccount) {
-                        currentAccount = accounts[0];
-                        console.log('currentAccount:' + currentAccount);
-                        fetchAccountData ()
-                        // Do any other work!
-                    }
-                }
-                // BinanceChain
-                //     .request({ method: 'eth_requestAccounts' })
-                //     .then(handleAccountsChanged)
-                //     .catch((err) => {
-                //         if (err.code === 4001) {
-                //             // EIP-1193 userRejectedRequest error
-                //             // If this happens, the user rejected the connection request.
-                //             console.log('Please connect to MetaMask.');
-                //         } else {
-                //             console.error(err);
-                //         }
-                //     });
+    //             BinanceChain.on('chainChanged', handleChainChanged);
 
-            } else {
-                console.log("NO window.BinanceChain ");
-                attempts = attempts + 1;
-                if (attempts > 5) {
-                    clearInterval(sendOrderStatus);
-                }
-            }
-        }, 5000);
+    //             function handleChainChanged(_chainId) {
+    //                 // We recommend reloading the page, unless you must do otherwise
+    //                 window.location.reload();
+    //             }
+    //             let currentAccount = null;
+    //             BinanceChain
+    //                 .request({ method: 'eth_accounts' })
+    //                 .then(handleAccountsChanged)
+    //                 .catch((err) => {
+    //                     // Some unexpected error.
+    //                     // For backwards compatibility reasons, if no accounts are available,
+    //                     // eth_accounts will return an empty array.
+    //                     console.error(err);
+    //                 });
+
+    //             BinanceChain.on('accountsChanged', handleAccountsChanged);
+
+    //             function handleAccountsChanged(accounts) {
+    //                 if (accounts.length === 0) {
+    //                     // Binance Chain Wallet is locked or the user has not connected any accounts
+    //                     console.log('Please connect to Binance Chain Wallet.');
+    //                 } else if (accounts[0] !== currentAccount) {
+    //                     currentAccount = accounts[0];
+    //                     console.log('currentAccount:' + currentAccount);
+    //                     fetchAccountData ()
+    //                     // Do any other work!
+    //                 }
+    //             }
+    //             // BinanceChain
+    //             //     .request({ method: 'eth_requestAccounts' })
+    //             //     .then(handleAccountsChanged)
+    //             //     .catch((err) => {
+    //             //         if (err.code === 4001) {
+    //             //             // EIP-1193 userRejectedRequest error
+    //             //             // If this happens, the user rejected the connection request.
+    //             //             console.log('Please connect to MetaMask.');
+    //             //         } else {
+    //             //             console.error(err);
+    //             //         }
+    //             //     });
+
+    //         } else {
+    //             console.log("NO window.BinanceChain ");
+    //             attempts = attempts + 1;
+    //             if (attempts > 5) {
+    //                 clearInterval(sendOrderStatus);
+    //             }
+    //         }
+    //     }, 5000);
 
        
 
-    }
+    // }
 
-    /**
-     * Buy button pressed.
-     */
-    async function onBuy () {
-        document.querySelector("#progress").style.display = "block";
+    // /**
+    //  * Buy button pressed.
+    //  */
+    // async function onBuy () {
+    //     document.querySelector("#progress").style.display = "block";
 
-        let countDots = 0;
-        let sendOrderStatus = setInterval(async function () {
-            let phrase = "Transaction in progress " + ".".repeat(countDots);
-            document.querySelector("#progress").textContent = phrase;
-            countDots++;
-            if (countDots === 4) countDots = 0;
-        }, 1000);
-        const web3 = new Web3(provider);
-        const chainId = await web3.eth.getChainId();
-        if (chainId !== 56 && chainId !== 97) {
-            document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
-            document.querySelector("#buy-obs").disabled = true;
-            document.querySelector("#progress").style.display = "none";
-            return;
-        }
-        let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
-        if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-        const openbiseaABI = _openbiseaABI;
-        const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
+    //     let countDots = 0;
+    //     let sendOrderStatus = setInterval(async function () {
+    //         let phrase = "Transaction in progress " + ".".repeat(countDots);
+    //         document.querySelector("#progress").textContent = phrase;
+    //         countDots++;
+    //         if (countDots === 4) countDots = 0;
+    //     }, 1000);
+    //     const web3 = new Web3(provider);
+    //     const chainId = await web3.eth.getChainId();
+    //     if (chainId !== 56 && chainId !== 97) {
+    //         document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
+    //         document.querySelector("#buy-obs").disabled = true;
+    //         document.querySelector("#progress").style.display = "none";
+    //         return;
+    //     }
+    //     let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
+    //     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+    //     const openbiseaABI = _openbiseaABI;
+    //     const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
 
-        const amountText = document.querySelector("#amount").value;
-        const amountDouble = parseFloat(amountText);
-        if (amountDouble <= 0.1) {
-            document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
-            document.querySelector("#buy-obs").disabled = true;
-            document.querySelector("#progress").style.display = "none";
-            return;
-        }
-        document.querySelector("#buy-obs").disabled = true;
+    //     const amountText = document.querySelector("#amount").value;
+    //     const amountDouble = parseFloat(amountText);
+    //     if (amountDouble <= 0.1) {
+    //         document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
+    //         document.querySelector("#buy-obs").disabled = true;
+    //         document.querySelector("#progress").style.display = "none";
+    //         return;
+    //     }
+    //     document.querySelector("#buy-obs").disabled = true;
 
-        const purchaseAmount = parseFloat(amountText) * (10 ** 18) + '';
-        let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call()
-        console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
-        let purchaseTokensOBSResult = await openbisea.methods.purchaseTokens().send({
-            from: selectedAccount,
-            value: purchaseAmount,
-            gas: 500000
-        }).catch((err) => {
-            console.log('err->' + JSON.stringify(err) );
-            document.querySelector("#obsamount").textContent = err.message;
-        });
-        if (purchaseTokensOBSResult !== undefined) {
-            console.log('purchaseTokensOBSResult:', purchaseTokensOBSResult.transactionHash);
-            document.querySelector("#buy-obs").disabled = false;
-            document.querySelector("#buy-obs-result").style.display = "inline-block";
-            resultURL = "https://bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
-            if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
-            document.querySelector("#progress").style.display = "none";
-        } else {
-            // document.querySelector("#obsamount").textContent = "Result undefined";
-            document.querySelector("#progress").style.display = "none";
-        }
-        clearInterval(sendOrderStatus);
-    }
+    //     const purchaseAmount = parseFloat(amountText) * (10 ** 18) + '';
+    //     let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call()
+    //     console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
+    //     let purchaseTokensOBSResult = await openbisea.methods.purchaseTokens().send({
+    //         from: selectedAccount,
+    //         value: purchaseAmount,
+    //         gas: 500000
+    //     }).catch((err) => {
+    //         console.log('err->' + JSON.stringify(err) );
+    //         document.querySelector("#obsamount").textContent = err.message;
+    //     });
+    //     if (purchaseTokensOBSResult !== undefined) {
+    //         console.log('purchaseTokensOBSResult:', purchaseTokensOBSResult.transactionHash);
+    //         document.querySelector("#buy-obs").disabled = false;
+    //         document.querySelector("#buy-obs-result").style.display = "inline-block";
+    //         resultURL = "https://bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
+    //         if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
+    //         document.querySelector("#progress").style.display = "none";
+    //     } else {
+    //         // document.querySelector("#obsamount").textContent = "Result undefined";
+    //         document.querySelector("#progress").style.display = "none";
+    //     }
+    //     clearInterval(sendOrderStatus);
+    // }
 
-    /**
-     * Buy button pressed.
-     */
-    async function onAmountChange () {
-        const web3 = new Web3(provider);
-        const chainId = await web3.eth.getChainId();
-        if (chainId !== 56 && chainId !== 97) {
-            document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
-            document.querySelector("#buy-obs").disabled = true;
-            return;
-        }
-        let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
-        if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-        const openbiseaABI = _openbiseaABI;
-        const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-        const amountText = document.querySelector("#amount").value;
-        const amountDouble = parseFloat(amountText);
-        if (amountDouble <= 0.1) {
-            document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
-            document.querySelector("#buy-obs").disabled = true;
-            return;
-        }
-        const purchaseAmount = parseFloat(amountText) * (10 ** 18) + '';
-        console.log('amount:', amountText);
-        console.log('purchaseAmount:', purchaseAmount);
+    // /**
+    //  * Buy button pressed.
+    //  */
+    // async function onAmountChange () {
+    //     const web3 = new Web3(provider);
+    //     const chainId = await web3.eth.getChainId();
+    //     if (chainId !== 56 && chainId !== 97) {
+    //         document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
+    //         document.querySelector("#buy-obs").disabled = true;
+    //         return;
+    //     }
+    //     let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
+    //     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+    //     const openbiseaABI = _openbiseaABI;
+    //     const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
+    //     const amountText = document.querySelector("#amount").value;
+    //     const amountDouble = parseFloat(amountText);
+    //     if (amountDouble <= 0.1) {
+    //         document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
+    //         document.querySelector("#buy-obs").disabled = true;
+    //         return;
+    //     }
+    //     const purchaseAmount = parseFloat(amountText) * (10 ** 18) + '';
+    //     console.log('amount:', amountText);
+    //     console.log('purchaseAmount:', purchaseAmount);
 
-        let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call();
-        console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
-        document.querySelector("#obsamount").textContent = "You will receive:" + Number(parseFloat(tokensForPurchaseAmountOBSResult[0]) / (10 ** 18)).toFixed(2) + " OBS";
-        document.querySelector("#buy-obs").disabled = false;
-    }
+    //     let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call();
+    //     console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
+    //     document.querySelector("#obsamount").textContent = "You will receive:" + Number(parseFloat(tokensForPurchaseAmountOBSResult[0]) / (10 ** 18)).toFixed(2) + " OBS";
+    //     document.querySelector("#buy-obs").disabled = false;
+    // }
 
-    /**
-     * Main entry point.
-     */
-    window.addEventListener('load', async () => {
-        // init();
-        document.querySelector("#btn-connect").addEventListener("click", onConnect);
-        document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
-        document.querySelector("#buy-obs").addEventListener("click", onBuy);
-        document.querySelector("#amount").addEventListener("input", onAmountChange);
-        document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
-    });
+    // /**
+    //  * Main entry point.
+    //  */
+    // window.addEventListener('load', async () => {
+    //     // init();
+    //     document.querySelector("#btn-connect").addEventListener("click", onConnect);
+    //     document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
+    //     document.querySelector("#buy-obs").addEventListener("click", onBuy);
+    //     document.querySelector("#amount").addEventListener("input", onAmountChange);
+    //     document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
+    // });
 
-    window.onload = function () {
-        init()
-    }
+    // window.onload = function () {
+    //     init()
+    // }
 </script>
 <script>
     (function () {

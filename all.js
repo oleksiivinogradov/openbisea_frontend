@@ -465,9 +465,120 @@ async function onResultClick() {
     window.open(resultURL, '_blank').focus();
 }
 
+
 /**
-* Translation
-*/
+ * Buy button pressed.
+ */
+ async function onBuy () {
+    document.querySelector("#progress").style.display = "block";
+
+    let countDots = 0;
+    let sendOrderStatus = setInterval(async function () {
+        let phrase = "Transaction in progress " + ".".repeat(countDots);
+        document.querySelector("#progress").textContent = phrase;
+        countDots++;
+        if (countDots === 4) countDots = 0;
+    }, 1000);
+    const web3 = new Web3(provider);
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== 56 && chainId !== 97) {
+        document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
+        document.querySelector("#buy-obs").disabled = true;
+        document.querySelector("#progress").style.display = "none";
+        return;
+    }
+    let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
+    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+    const openbiseaABI = _openbiseaABI;
+    const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
+
+    const amountText = document.querySelector("#amount").value;
+    const amountDouble = parseFloat(amountText);
+    if (amountDouble <= 0.1) {
+        document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
+        document.querySelector("#buy-obs").disabled = true;
+        document.querySelector("#progress").style.display = "none";
+        return;
+    }
+    document.querySelector("#buy-obs").disabled = true;
+
+    const purchaseAmount = parseFloat(amountText) * (10 ** 18) + '';
+    let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call()
+    console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
+    let purchaseTokensOBSResult = await openbisea.methods.purchaseTokens().send({
+        from: selectedAccount,
+        value: purchaseAmount,
+        gas: 500000
+    }).catch((err) => {
+        console.log('err->' + JSON.stringify(err) );
+        document.querySelector("#obsamount").textContent = err.message;
+    });
+    if (purchaseTokensOBSResult !== undefined) {
+        console.log('purchaseTokensOBSResult:', purchaseTokensOBSResult.transactionHash);
+        document.querySelector("#buy-obs").disabled = false;
+        document.querySelector("#buy-obs-result").style.display = "inline-block";
+        resultURL = "https://bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
+        if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
+        document.querySelector("#progress").style.display = "none";
+    } else {
+        // document.querySelector("#obsamount").textContent = "Result undefined";
+        document.querySelector("#progress").style.display = "none";
+    }
+    clearInterval(sendOrderStatus);
+}
+
+/**
+ * Buy button pressed.
+ */
+async function onAmountChange () {
+    const web3 = new Web3(provider);
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== 56 && chainId !== 97) {
+        document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
+        document.querySelector("#buy-obs").disabled = true;
+        return;
+    }
+    let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
+    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+    const openbiseaABI = _openbiseaABI;
+    const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
+    const amountText = document.querySelector("#amount").value;
+    const amountDouble = parseFloat(amountText);
+    if (amountDouble <= 0.1) {
+        document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
+        document.querySelector("#buy-obs").disabled = true;
+        return;
+    }
+    const purchaseAmount = parseFloat(amountText) * (10 ** 18) + '';
+    console.log('amount:', amountText);
+    console.log('purchaseAmount:', purchaseAmount);
+
+    let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call();
+    console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
+    document.querySelector("#obsamount").textContent = "You will receive:" + Number(parseFloat(tokensForPurchaseAmountOBSResult[0]) / (10 ** 18)).toFixed(2) + " OBS";
+    document.querySelector("#buy-obs").disabled = false;
+}
+
+
+
+// GET parameters from URL
+function findGetParameter(parameterName) {
+    var result = null,
+        tmp = [];
+    location.search
+        .substr(1)
+        .split("&")
+        .forEach(function (item) {
+          tmp = item.split("=");
+          if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        });
+    return result;
+}
+
+
+// /**
+// * Translation
+// */
 
 const enObj =  {
             
@@ -511,6 +622,8 @@ const enObj =  {
     approve:"Approve",
     bid:"Bid",
     image:"Image",
+    check:"Check",
+    registerContract:"Register contract",
 
     whitelistContract:"Whitelist contract",
     contractNotWhitelisted:"Contract not whitelisted. Please press Whitelist to add.",
@@ -522,7 +635,20 @@ const enObj =  {
     loading:"Loading...",
 
     beforeCSV:"Before upload check CSV format: name;description;artist;public url;image url; external url (optional) ",
-    uploadCSV:"CSV list upload"
+
+    uploadCSV:"CSV list upload",
+
+    EthereumBSCBridge: "Ethereum - Binance Smart chain bridge",
+    pleaseCheckETH:"Please check if ETH asset contract registered first: ",
+    contractNotChecked:"Contract not checked in.",
+    chooseAssetToConvert:"Please choose asset to convert depends from type:",
+
+    convertETHtoBSC:"Convert from Ethereum to Binance Smart Chain",
+    convertBSCtoETH:"Convert back from Binance Smart Chain to Ethereum",
+    approveETH:"Approve ETH",
+    convertETH:"Convert ETH",
+    approveBSC:"Approve BSC",
+    convertBSC:"Convert BSC",
 
 
 }
@@ -570,9 +696,11 @@ const ruObj = {
     approve:"Подтвердить",
     bid:"Сделать ставку",
     image:"Изображение",
+    check:"Проверить",
+    registerContract:"Register contract-rus",
 
-    whitelistContract:"Whitelist contract",
-    contractNotWhitelisted:"Contract not whitelisted. Please press Whitelist to add.",
+    whitelistContract:"Whitelist contract-rus",
+    contractNotWhitelisted:"Contract not whitelisted. Please press Whitelist to add.-rus",
     noWalletConnected:"Кошелек не подключен. Подключите кошелек чтобы увидить ваши аккаунты и балансы в BNB.",
     connectWallet:"Подключить кошелек",
     NFTOwnerLoading: "информация о владельце NFT загружается...",
@@ -581,9 +709,23 @@ const ruObj = {
     approveNFT: "Подвтердить NFT",
     loading:"Загрузка...",
 
-    beforeCSV:"Before upload check CSV format: name;description;artist;public url;image url; external url (optional) ",
+    beforeCSV:"Before upload check CSV format: name;description;artist;public url;image url; external url (optional) -rus",
 
-    uploadCSV:"загрузить CSV"
+    uploadCSV:"загрузить CSV",
+
+    EthereumBSCBridge: "Ethereum - Binance Smart chain bridge - RUS",
+
+    pleaseCheckETH:"Please check if ETH asset contract registered first: - RUS",
+
+    contractNotChecked:"Contract not checked in.-rus",
+    chooseAssetToConvert:"Please choose asset to convert depends from type:-rus",
+
+    convertETHtoBSC:"Convert from Ethereum to Binance Smart Chain-rus",
+    convertBSCtoETH:"Convert back from Binance Smart Chain to Ethereum-rus",
+    approveETH:"Approve ETH-rus",
+    convertETH:"Convert ETH-rus",
+    approveBSC:"Approve BSC-rus",
+    convertBSC:"Convert BSC-rus",
 
 
 }
@@ -608,10 +750,456 @@ function Translate() {
             const key = elem.getAttribute(_self.attribute);
 
             if (key != null) {
-                console.log(key+" -> "+langs[`${_self.lng}`].walletconnectH1);
+                
                 elem.innerHTML = langs[`${_self.lng}`][key];
             }
         }
 
     }
+}
+
+
+function translateText(lang){
+    const translate = new Translate();
+    translate.init('data-tag', lang);
+    translate.process(); 
+}
+
+// Intigration chunks 
+function chunkLoad(file,selector,lang){
+    fetch(file)
+        .then(response => {
+            return response.text()
+        })
+        .then(data => {
+            selector.innerHTML = data;
+            translateText(lang);
+        });
+}
+
+// Check that the web page is run in a secure context,
+// as otherwise MetaMask won't be available
+function isHttps(){
+    console.log(location.protocol);
+    if (location.protocol !== 'https:') {
+        // https://ethereum.stackexchange.com/a/62217/620
+        const alert = document.querySelector("#alert-error-https");
+        alert.style.display = "block";
+        document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+        return ;
+    }
+}
+
+
+// // Tell Web3modal what providers we have available.
+// // Built-in web browser provider (only one can exist as a time)
+// // like MetaMask, Brave or Opera is added automatically by Web3modal
+const Web3Modal = window.Web3Modal.default;
+const WalletConnectProvider = window.WalletConnectProvider.default;
+const Fortmatic = window.Fortmatic;
+const evmChains = window.evmChains;
+
+let web3Modal
+let provider;
+let selectedAccount;
+let resultURL;
+
+
+const providerOptions = {
+    walletconnect: {
+        package: WalletConnectProvider,
+        options: {
+            // Mikko's test key - don't copy as your mileage may vary
+            infuraId: "bb7b522604e54a2f8ad251e7417b2355",
+        }
+    },
+
+    // fortmatic: {
+    //   package: Fortmatic,
+    //   options: {
+    //     // Mikko's TESTNET api key
+    //     key: "pk_test_391E26A3B43A3350"
+    //   }
+    // }
+};
+
+web3Modal = new Web3Modal({
+    cacheProvider: false, // optional
+    providerOptions, // required
+    disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
+});
+
+
+async function sendOrderStatusFunction(attempts,sendOrderStatus){
+    if (window.BinanceChain !== undefined) {
+        clearInterval(sendOrderStatus);
+        console.log("YES window.BinanceChain ");
+
+        const BinanceChain = window.BinanceChain;
+        provider = BinanceChain;
+
+        let currentChainId = BinanceChain.chainId;
+        console.log('currentChainId:' + currentChainId);
+
+        BinanceChain.on('chainChanged', handleChainChanged);
+
+        function handleChainChanged(_chainId) {
+            // We recommend reloading the page, unless you must do otherwise
+            window.location.reload();
+        }
+        let currentAccount = null;
+        BinanceChain
+            .request({
+                method: 'eth_accounts'
+            })
+            .then(handleAccountsChanged)
+            .catch((err) => {
+                // Some unexpected error.
+                // For backwards compatibility reasons, if no accounts are available,
+                // eth_accounts will return an empty array.
+                console.error(err);
+            });
+
+        BinanceChain.on('accountsChanged', handleAccountsChanged);
+
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                // Binance Chain Wallet is locked or the user has not connected any accounts
+                console.log('Please connect to Binance Chain Wallet.');
+            } else if (accounts[0] !== currentAccount) {
+                currentAccount = accounts[0];
+                console.log('currentAccount:' + currentAccount);
+                fetchAccountData()
+                // Do any other work!
+            }
+        }
+        // BinanceChain
+        //     .request({ method: 'eth_requestAccounts' })
+        //     .then(handleAccountsChanged)
+        //     .catch((err) => {
+        //         if (err.code === 4001) {
+        //             // EIP-1193 userRejectedRequest error
+        //             // If this happens, the user rejected the connection request.
+        //             console.log('Please connect to MetaMask.');
+        //         } else {
+        //             console.error(err);
+        //         }
+        //     });
+
+    } else {
+        console.log("NO window.BinanceChain ");
+        attempts = attempts + 1;
+        if (attempts > 5) {
+            clearInterval(sendOrderStatus);
+        }
+    }
+}
+
+
+
+
+
+
+
+/**
+     * onResultClick button pressed.
+     */
+ async function onDetailsClick () {
+    window.open(nftDetailsURL, '_blank').focus();
+}
+/**
+ * Buy button pressed.
+ */
+async function mintNFT(body) {
+    return new Promise((resolve, reject) => {
+        fetch('https://mac8.cfc.io/api/ipfsForNFT', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+            .then(response => response.text())
+            .then(async data => {
+                console.log(data);
+                if (data.length !== 46) {
+                    console.log('wrong data');
+                    reject('wrong data');
+                    return;
+                }
+                let link = 'ipfs://' + data;
+                const web3 = new Web3(provider);
+                const chainId = await web3.eth.getChainId();
+                let nftAddress = '0xb861DF245fc18483235D9C11b87d8A76F4678e08';
+                if (chainId === 97) nftAddress = "0x873783a6c4586C196adfDb15C8ACdc576B799938";
+                const nftABI = JSON.parse('[{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6c0360eb"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"tokenUri","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd0def521"}]');
+                const nft = new web3.eth.Contract(nftABI, nftAddress);
+
+                let mintNFTResult = await nft.methods.mint(selectedAccount, link).send({
+                    from: selectedAccount,
+                    gas: 500000
+                }).catch((err) => {
+                    console.log('err->' + JSON.stringify(err));
+                    reject(err.message)
+                });
+                if (mintNFTResult !== undefined) {
+
+                    console.log('mintNFTResult:', mintNFTResult);
+                    const tokenId = mintNFTResult.events.Transfer.returnValues.tokenId
+                    // document.querySelector("#progress").textContent = "Your link to share: https://openbisea.io/detailsnft?tokenID=" + tokenId;
+                    console.log('tokenId:', tokenId);
+                    // nftDetailsURL = "https://openbisea.io/detailsnft?tokenID=" + tokenId;
+                    // document.querySelector("#progress").style.display = "none";
+
+                    let resultURLlocal = "https://bscscan.com/tx/" + mintNFTResult.transactionHash
+                    if (chainId === 97) resultURLlocal = "http://testnet.bscscan.com/tx/" + mintNFTResult.transactionHash
+                    resolve([resultURLlocal,"https://openbisea.io/detailsnft?tokenID=" + tokenId])
+                } else {
+                    reject('mintNFTResult undefined');
+                }
+            })
+            .catch(error => {
+                console.error(error)
+            })
+    })
+}
+
+async function onMint () {
+    document.querySelector("#progress").style.display = "block";
+    document.querySelector("#mint").disabled = true;
+
+    let countDots = 0;
+    let sendOrderStatus = setInterval(async function () {
+        let phrase = "Transaction in progress " + ".".repeat(countDots);
+        document.querySelector("#progress").textContent = phrase;
+        countDots++;
+        if (countDots === 4) countDots = 0;
+    }, 1000);
+    const web3 = new Web3(provider);
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== 56 && chainId !== 97) {
+        document.querySelector("#progress").textContent = "We support only BSC mainnet";
+        document.querySelector("#mint").disabled = true;
+        // document.querySelector("#progress").style.display = "none";
+        return;
+    }
+    let nftAddress = '0xb861DF245fc18483235D9C11b87d8A76F4678e08';
+    if (chainId === 97) nftAddress = "0x873783a6c4586C196adfDb15C8ACdc576B799938";
+    const nftABI = JSON.parse('[{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6c0360eb"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"tokenUri","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd0def521"}]');
+    const nft = new web3.eth.Contract(nftABI, nftAddress);
+
+    if (nftBulkList.length > 0) {
+        document.querySelector("#csvInfo").innerText = "NFT mint Result:";
+        let index = nftBulkList.length - 1;
+        for (const nft of nftBulkList) {
+            let body = {
+                name:nft.name,
+                description:nft.description,
+                external_url:nft.external_url,
+                image_url:nft.image_url,
+                properties: {
+                    artist:nft.artist,
+                    public_profile_link:nft.public_url
+                }
+            };
+            console.log('body:', body);
+
+            let resultMint = await mintNFT(body);
+            console.log('resultMint:', resultMint);
+            document.querySelector("#csvInfo").innerText =  document.querySelector("#csvInfo").innerText + "\n" + resultMint[0]+ "\n" + resultMint[1]
+            index = index -1
+            if (index === 0 ) {
+                document.querySelector("#mint").disabled = false;
+                clearInterval(sendOrderStatus);
+            }
+
+        }
+        return;
+    }
+    let description = document.querySelector("#desc").value
+    let description_text = document.querySelector("#desc").textContent
+    console.log('description:', document.querySelector("#desc"));
+    console.log('description_text:', description_text);
+
+    let body = {
+        name:document.querySelector("#name").value,
+        description:description,
+        image:base64image,
+        ext:extentionImage,
+        image_url:document.querySelector("#linkToImage").value,
+        animation_url:document.querySelector("#linkToVideo").value,
+        glb_url:document.querySelector("#linkToGlb").value,
+        properties: {
+            artist:document.querySelector("#artist").value,
+            public_profile_link:document.querySelector("#public_profile_link").value
+        }
+    };
+    if (base64animation !== undefined) {
+        body.animation = base64animation;
+        body.extAnimation = extentionAnimation;
+    }
+    if (base64glb !== undefined) {
+        body.glb = base64glb;
+    }
+    console.log(JSON.stringify(body));
+    // fetch('https://mac8.cfc.io/api/ipfsForNFT', {
+
+    fetch('https://mac8.cfc.io/api/ipfsForNFT', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain'
+        },
+        body: JSON.stringify(body)
+    })
+        .then(response => response.text())
+        .then(async data => {
+            console.log(data);
+            if (data.length !== 46) {
+                console.log('wrong data');
+                return;
+            }
+            let link = 'ipfs://' + data;
+
+
+            let mintNFTResult = await nft.methods.mint(selectedAccount,link).send({
+                from: selectedAccount,
+                gas: 500000
+            }).catch((err) => {
+                console.log('err->' + JSON.stringify(err) );
+                document.querySelector("#progress").textContent = err.message;
+            });
+            if (mintNFTResult !== undefined) {
+
+                console.log('mintNFTResult:', mintNFTResult);
+                const tokenId = mintNFTResult.events.Transfer.returnValues.tokenId
+                document.querySelector("#progress").textContent = "Your link to share: https://openbisea.io/detailsnft?tokenID=" + tokenId;
+                console.log('tokenId:', tokenId);
+                nftDetailsURL = "https://openbisea.io/detailsnft?tokenID=" + tokenId;
+                // document.querySelector("#progress").style.display = "none";
+
+                document.querySelector("#mint").disabled = false;
+                document.querySelector("#buy-obs-result").style.display = "inline-block";
+                document.querySelector("#link-to-nft-details").style.display = "inline-block";
+                resultURL = "https://bscscan.com/tx/" + mintNFTResult.transactionHash
+                if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + mintNFTResult.transactionHash
+                // document.querySelector("#progress").style.display = "none";
+            } else {
+                document.querySelector("#progress").style.display = "none";
+            }
+            clearInterval(sendOrderStatus);
+        })
+        .catch(error => {
+            console.error(error)
+        })
+
+}
+
+function extFrom(name) {
+    const lastDot = name.lastIndexOf('.');
+    const fileName = name.substring(0, lastDot);
+    const ext = name.substring(lastDot + 1);
+    return ext
+}
+let extentionImage
+let extentionAnimation
+let base64image
+const handleImageUpload = async event => {
+    const files = event.target.files
+    extentionImage = extFrom(files[0].name)
+
+    base64image = await getBase64(files[0]);
+    base64image = base64image.split(',')[1];
+    // console.log('base64image ' + base64image );
+    document.querySelector("#mint").disabled = false;
+    document.querySelector("#imageUpload").textContent = "Image uploaded";
+}
+let base64animation
+
+const handleAnimationUpload = async event => {
+    const files = event.target.files
+    base64animation = await getBase64(files[0]);
+    base64animation = base64animation.split(',')[1];
+    extentionAnimation = extFrom(files[0].name)
+
+    document.querySelector("#mint").disabled = false;
+    document.querySelector("#animationUpload").textContent = "Animation uploaded";
+}
+
+let base64glb
+
+const handleGlbUpload = async event => {
+    const files = event.target.files
+    base64glb = await getBase64(files[0]);
+    base64glb = base64glb.split(',')[1];
+
+    document.querySelector("#mint").disabled = false;
+    document.querySelector("#animationUpload").textContent = "3D model uploaded";
+}
+
+let nftBulkList = []
+
+const handleCsvUpload = async event => {
+    function readFile(file) {
+        return new Promise((resolve, reject) => {
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+                resolve(fileReader.result);
+            };
+            fileReader.onerror = () => {
+                reject(fileReader.error);
+            };
+            fileReader.readAsText(file);
+        });
+    }
+
+    const files = event.target.files
+    const fileContent = await readFile(event.target.files[0]);
+
+    let nfts = fileContent.split('\n');
+    console.log('fileContent',fileContent);
+
+    const web3 = new Web3(new Web3.providers.HttpProvider('https://bsc-dataseed1.binance.org'));
+    console.log("Web3 instance is", web3);
+
+    // Get connected chain id from Ethereum node
+    const chainId = await web3.eth.getChainId();
+    let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
+    if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
+    const erc721abi = _erc721abi;
+
+    let nftContract = new web3.eth.Contract(erc721abi, nftContractAddress);
+    let totalSupply = parseInt(await nftContract.methods.totalSupply().call().catch(function (error) {console.log('ownerOf:' + error)}));
+    let preview = "NFT list to add:"
+    for (const nft of nfts) {
+        const nftObject = nft.split(';');
+        //name;description;artist;public url;image url; external url (optional)
+        const name = nftObject[0]
+        const description = nftObject[1]
+        const artist = nftObject[2]
+        const public_url = nftObject[3]
+        const image_url = nftObject[4]
+        if (name === undefined || description === undefined || artist === undefined || public_url === undefined || image_url === undefined) {
+            preview = preview + "\nERROR!!! - must filled all fields in:" + nft;
+            continue;
+        }
+        let external_url = "https://openbisea.io/detailsnft?tokenID=" + totalSupply
+        totalSupply = totalSupply + 1;
+        if (nftObject.length > 5) {
+            external_url = nftObject[5]
+        }
+        preview = preview + "\n" + name + ";" + description + ";" + artist + ";" + public_url + ";" + image_url + ";" + external_url;
+        nftBulkList.push( {
+            name:name,
+            description:description,
+            artist:artist,
+            public_url:public_url,
+            image_url:image_url,
+            external_url:external_url
+        })
+    }
+    document.querySelector("#csvInfo").innerText = preview;
+    console.log('document.querySelector("#csvInfo"):', document.querySelector("#csvInfo"));
+
+    document.querySelector("#mint").disabled = false;
+    document.querySelector("#fileCsvUpload").textContent = "CSV uploaded";
 }
