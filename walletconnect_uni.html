@@ -117,6 +117,10 @@
 
     }
 
+    window.addEventListener('load', async () => {
+        document.querySelector("#buy-obs").addEventListener("click", onBuy);
+        document.querySelector("#amount").addEventListener("input", onAmountChange);
+    });
     document.body.addEventListener('click', function (event) {
         if (event.target.id == 'btn-connect') {
             onConnect()
@@ -127,9 +131,9 @@
         if (event.target.id == 'buy-obs') {
             onBuy()
         };
-        if (event.target.id == 'amount') {
-            onAmountChange()
-        };
+        // if (event.target.id == 'amount') {
+        //     onAmountChange()
+        // };
         if (event.target.id == 'buy-obs-result') {
             onResultClick()
         };

@@ -168,7 +168,7 @@ let lang = findGetParameter('lang')
         document.querySelector("#convertBSC").addEventListener("click", onConvertBSC);
 
         // document.querySelector("#amount").addEventListener("input", onAmountChange);
-        document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
+        //document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
     });
 
     document.body.addEventListener( 'click', function ( event ) {
@@ -177,6 +177,9 @@ let lang = findGetParameter('lang')
         };
         if( event.target.id == 'btn-disconnect' ) {
             onDisconnect()
+        };
+        if( event.target.id == 'buy-obs-result' ) {
+            onResultClick()
         };
     } );
 
