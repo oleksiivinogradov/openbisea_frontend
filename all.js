@@ -2137,7 +2137,6 @@ async function onCreate() {
  * Buy button pressed.
  */
 async function onMint() {
-    document.querySelector("#progress").style.display = "block";
     document.querySelector("#mint").disabled = true;
 
     let countDots = 0;
@@ -2147,34 +2146,82 @@ async function onMint() {
         countDots++;
         if (countDots === 4) countDots = 0;
     }, 1000);
-
     const web3 = new Web3(provider);
     const chainId = await web3.eth.getChainId();
     if (chainId !== 56 && chainId !== 97) {
-        document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
+        document.querySelector("#progress").textContent = "We support only BSC mainnet";
         document.querySelector("#mint").disabled = true;
-        document.querySelector("#progress").style.display = "none";
+        // document.querySelector("#progress").style.display = "none";
         return;
     }
+    let nftAddress = '0xb861DF245fc18483235D9C11b87d8A76F4678e08';
+    if (chainId === 97) nftAddress = "0x873783a6c4586C196adfDb15C8ACdc576B799938";
+    const nftABI = JSON.parse('[{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6c0360eb"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"tokenUri","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd0def521"}]');
+    const nft = new web3.eth.Contract(nftABI, nftAddress);
+
+    if (nftBulkList.length > 0) {
+        document.querySelector("#csvInfo").innerText = "NFT mint Result:";
+        let index = nftBulkList.length - 1;
+        for (const nft of nftBulkList) {
+            let body = {
+                name:nft.name,
+                description:nft.description,
+                external_url:nft.external_url,
+                image_url:nft.image_url,
+                properties: {
+                    artist:nft.artist,
+                    public_profile_link:nft.public_url
+                }
+            };
+            console.log('body:', body);
+
+            let resultMint = await mintNFT(body);
+            console.log('resultMint:', resultMint);
+            document.querySelector("#csvInfo").innerText =  document.querySelector("#csvInfo").innerText + "\n" + resultMint[0]+ "\n" + resultMint[1]
+            index = index -1
+            if (index === 0 ) {
+                document.querySelector("#mint").disabled = false;
+                clearInterval(sendOrderStatus);
+            }
+
+        }
+        return;
+    }
+    let description = document.querySelector("#desc").value
+    let description_text = document.querySelector("#desc").textContent
+    console.log('description:', document.querySelector("#desc"));
+    console.log('description_text:', description_text);
 
     let body = {
-        name: document.querySelector("#name").value,
-        description: document.querySelector("#desc").value,
-        image: base64image,
+        name:document.querySelector("#name").value,
+        description:description,
+        image:base64image,
+        ext:extentionImage,
+        image_url:document.querySelector("#linkToImage").value,
+        animation_url:document.querySelector("#linkToVideo").value,
+        glb_url:document.querySelector("#linkToGlb").value,
         properties: {
-            artist: document.querySelector("#artist").value,
-            public_profile_link: document.querySelector("#public_profile_link").value
+            artist:document.querySelector("#artist").value,
+            public_profile_link:document.querySelector("#public_profile_link").value
         }
     };
-    console.log('JSON.stringify(body)',JSON.stringify(body));
+    if (base64animation !== undefined) {
+        body.animation = base64animation;
+        body.extAnimation = extentionAnimation;
+    }
+    if (base64glb !== undefined) {
+        body.glb = base64glb;
+    }
+    console.log(JSON.stringify(body));
+    // fetch('https://mac8.cfc.io/api/ipfsForNFT', {
 
     fetch('https://mac8.cfc.io/api/ipfsForNFT', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain'
+        },
+        body: JSON.stringify(body)
+    })
         .then(response => response.text())
         .then(async data => {
             console.log(data);
@@ -2184,27 +2231,30 @@ async function onMint() {
             }
             let link = 'ipfs://' + data;
 
-            let nftAddress = '0xb861DF245fc18483235D9C11b87d8A76F4678e08';
-            if (chainId === 97) nftAddress = "0x873783a6c4586C196adfDb15C8ACdc576B799938";
-            const nftABI = JSON.parse('[{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6c0360eb"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"tokenUri","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd0def521"}]');
-            const nft = new web3.eth.Contract(nftABI, nftAddress);
 
-            let mintNFTResult = await nft.methods.mint(selectedAccount, link).send({
+            let mintNFTResult = await nft.methods.mint(selectedAccount,link).send({
                 from: selectedAccount,
                 gas: 500000
             }).catch((err) => {
-                console.log('err->' + JSON.stringify(err));
-                document.querySelector("#obsamount").textContent = err.message;
+                console.log('err->' + JSON.stringify(err) );
+                document.querySelector("#progress").textContent = err.message;
             });
             if (mintNFTResult !== undefined) {
-                console.log('mintNFTResult:', mintNFTResult.transactionHash);
+
+                console.log('mintNFTResult:', mintNFTResult);
+                const tokenId = mintNFTResult.events.Transfer.returnValues.tokenId
+                document.querySelector("#progress").textContent = "Your link to share: https://openbisea.io/detailsnft?tokenID=" + tokenId;
+                console.log('tokenId:', tokenId);
+                nftDetailsURL = "https://openbisea.io/detailsnft?tokenID=" + tokenId;
+                // document.querySelector("#progress").style.display = "none";
+
                 document.querySelector("#mint").disabled = false;
                 document.querySelector("#buy-obs-result").style.display = "inline-block";
+                document.querySelector("#link-to-nft-details").style.display = "inline-block";
                 resultURL = "https://bscscan.com/tx/" + mintNFTResult.transactionHash
                 if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + mintNFTResult.transactionHash
-                document.querySelector("#progress").style.display = "none";
+                // document.querySelector("#progress").style.display = "none";
             } else {
-                // document.querySelector("#obsamount").textContent = "Result undefined";
                 document.querySelector("#progress").style.display = "none";
             }
             clearInterval(sendOrderStatus);
