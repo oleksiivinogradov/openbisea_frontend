@@ -181,7 +181,7 @@ async function fetchAccountData() {
         const openBiSeaAuctionAbi = _openBiSeaAuctionAbi;
         let openBiSeaAuctionContract = new web3.eth.Contract(openBiSeaAuctionAbi, openBiSeaAuctionAddress);
 
-        if (options.page === 'wc_auctuons' && options.lang === 'en') {
+        if (options.page === 'wc_auctuons') {
             let contractWhitelisted = await openBiSeaAuctionContract.methods.contractsNFTWhitelisted().call().catch(function (error) {
                 console.log('contractsNFTWhitelisted:' + error)
             });
@@ -189,6 +189,7 @@ async function fetchAccountData() {
             const auctionsContainer = document.querySelector("#auctions");
             auctionsContainer.innerHTML = '';
             let index = 1;
+            console.log('contractWhitelisted', contractWhitelisted);
 
             for (const contract of contractWhitelisted) {
                 console.log('check contract', contract);
