@@ -2138,6 +2138,7 @@ async function onCreate() {
  */
 async function onMint() {
     document.querySelector("#mint").disabled = true;
+    document.querySelector("#progress").style.display = "block";
 
     let countDots = 0;
     let sendOrderStatus = setInterval(async function () {
@@ -2253,7 +2254,7 @@ async function onMint() {
                 document.querySelector("#link-to-nft-details").style.display = "inline-block";
                 resultURL = "https://bscscan.com/tx/" + mintNFTResult.transactionHash
                 if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + mintNFTResult.transactionHash
-                // document.querySelector("#progress").style.display = "none";
+                document.querySelector("#progress").style.display = "none";
             } else {
                 document.querySelector("#progress").style.display = "none";
             }
@@ -2261,6 +2262,7 @@ async function onMint() {
         })
         .catch(error => {
             console.error(error)
+            document.querySelector("#progress").textContent = "Error:" + error;
         })
 
 }
