@@ -559,7 +559,7 @@ async function onAmountChange() {
     const amountText = document.querySelector("#amount").value;
     const amountDouble = parseFloat(amountText);
     if (amountDouble <= 0.1) {
-        document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
+        document.querySelector("#obsamount").textContent = langs[options.lang].purchaseOBSwarn;
         document.querySelector("#buy-obs").disabled = true;
         return;
     }
@@ -631,6 +631,8 @@ const enObj = {
     walletconnectAuctuonsH1: "Auctions",
 
     purchaseOBS: "Purchase OBS",
+    purchaseOBSwarn: "must be minimum 0.1BNB to purchase OBS",
+
 
     copy: "Copy",
     approve: "Approve",
@@ -705,6 +707,7 @@ const ruObj = {
     walletconnectAuctuonsH1: "Аукционы",
 
     purchaseOBS: "Купить OBS",
+    purchaseOBSwarn: "Минимум 0.1BNB для покупки OBS",
 
     copy: "Копировать",
     approve: "Подтвердить",
@@ -743,6 +746,10 @@ const ruObj = {
 
 
 }
+const langs = {
+    en: enObj,
+    ru: ruObj,
+}
 
 function Translate() {
     //initialization
@@ -750,10 +757,7 @@ function Translate() {
         this.attribute = attribute;
         this.lng = lng;
     }
-    const langs = {
-        en: enObj,
-        ru: ruObj,
-    }
+
     //translate 
     this.process = function () {
         _self = this;
