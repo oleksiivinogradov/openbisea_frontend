@@ -277,7 +277,9 @@ async function fetchAccountData() {
                     }
                 });
 
-                await Promise.all(rowResolversAuction);
+                await Promise.all(rowResolversAuction).then(data => {
+                    translateText(options.lang);
+                });
             }
         } else {
             let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
