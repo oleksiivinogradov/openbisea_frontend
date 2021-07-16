@@ -389,7 +389,9 @@ async function fetchAccountData() {
                 }
             });
 
-            await Promise.all(rowResolversAuction);
+            await Promise.all(rowResolversAuction).then(data => {
+                translateText(options.lang);
+            });
         }
     }
 
