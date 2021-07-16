@@ -99,14 +99,6 @@ function getBase64(file) {
  * Kick in the UI action after Web3modal dialog has chosen a provider
  */
 async function fetchAccountData() {
-    let _openbiseaAddress, _openBiSeaAuctionAddressMainnet;
-    if ((options.page == 'wc_details_nft' || options.page == 'wc_auctuons') && options.lang == 'en') {
-        _openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
-        _openBiSeaAuctionAddressMainnet = "0x1d2dfE8D85ddD235cb48a1282d45444543313A5B";
-    } else {
-        _openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
-        _openBiSeaAuctionAddressMainnet = "0x1c2b69833967500042d476B1149D4074B59c1A17";
-    }
 
     auctionsNormalized = {};
 
@@ -117,6 +109,13 @@ async function fetchAccountData() {
 
     // Get connected chain id from Ethereum node
     const chainId = await web3.eth.getChainId();
+    let _openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72',
+        _openBiSeaAuctionAddress = "0x1d2dfE8D85ddD235cb48a1282d45444543313A5B";
+    if (chainId === 97) {
+        _openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+        _openBiSeaAuctionAddress = "0xA72821226E7ac461A3CA30434f3D4671c8A3DC37";
+    }
+
     // Load chain information over an HTTP API
     const chainData = evmChains.getChain(chainId);
     document.querySelector("#network-name").textContent = chainData.name;
@@ -128,10 +127,10 @@ async function fetchAccountData() {
     console.log("Got accounts", accounts);
     selectedAccount = accounts[0];
 
-    if (options.page == 'wc_details_nft') {
+    if (options.page === 'wc_details_nft') {
         if (ownerOftoken !== undefined && selectedAccount !== undefined && ownerOftoken.toLowerCase() === selectedAccount.toLowerCase()) {
             document.querySelector("#create-auction").style.display = "inline-block";
-            if (options.lang == 'en') {
+            if (options.lang === 'en') {
                 document.querySelector("#cancel-auction").style.display = "inline-block";
             }
             console.log("ownerOftokens", ownerOftoken);
@@ -167,22 +166,15 @@ async function fetchAccountData() {
     await Promise.all(rowResolvers);
 
     if (options.rowResolve) {
-        let openbiseaAddress = _openbiseaAddress;
-
-        if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-
         const erc721abi = _erc721abi;
         const openbiseaABI = _openbiseaABI;
-        const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-        const openBiSeaAuctionAbi = _openBiSeaAuctionAbi;
-        const openBiSeaAuctionAddressTestnet = "0xA72821226E7ac461A3CA30434f3D4671c8A3DC37";
-        const openBiSeaAuctionAddressMainnet = _openBiSeaAuctionAddressMainnet;
+        const openbisea = new web3.eth.Contract(openbiseaABI, _openbiseaAddress);
 
-        let openBiSeaAuctionAddress = openBiSeaAuctionAddressMainnet;
-        if (chainId === 97) openBiSeaAuctionAddress = openBiSeaAuctionAddressTestnet;
+        let openBiSeaAuctionAddress = _openBiSeaAuctionAddress;
+        const openBiSeaAuctionAbi = _openBiSeaAuctionAbi;
         let openBiSeaAuctionContract = new web3.eth.Contract(openBiSeaAuctionAbi, openBiSeaAuctionAddress);
 
-        if (options.page == 'wc_auctuons' && options.lang == 'en') {
+        if (options.page === 'wc_auctuons' && options.lang === 'en') {
             let contractWhitelisted = await openBiSeaAuctionContract.methods.contractsNFTWhitelisted().call().catch(function (error) {
                 console.log('contractsNFTWhitelisted:' + error)
             });
@@ -193,8 +185,6 @@ async function fetchAccountData() {
 
             for (const contract of contractWhitelisted) {
                 console.log('check contract', contract);
-                let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
-                if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
                 let nftContract = new web3.eth.Contract(erc721abi, contract);
 
                 let auctions = await openBiSeaAuctionContract.methods.getNFTsAuctionList(contract).call().catch(function (error) {
@@ -285,7 +275,7 @@ async function fetchAccountData() {
             let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
             if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
 
-            if (options.page == 'wc_details_nft' && options.lang == 'en') {
+            if (options.page === 'wc_details_nft' && options.lang === 'en') {
                 if (contractSaved !== undefined) {
                     nftContractAddress = contractSaved
                     let isContractNFTWhitelisted = await openBiSeaAuctionContract.methods.isContractNFTWhitelisted(contractSaved).call().catch(function (error) {
@@ -319,12 +309,12 @@ async function fetchAccountData() {
                 let sellerBN = web3.utils.toBN(seller);
                 var tokenID = auctionBN.sub(sellerBN).toNumber() + '';
 
-                if (options.page == 'wc_details_nft' && tokenIDsaved + '' === tokenID) {
+                if (options.page === 'wc_details_nft' && tokenIDsaved + '' === tokenID) {
                     let auctionInfo = await openBiSeaAuctionContract.methods.getAuction(nftContractAddress, tokenID).call().catch(function (error) {
                         console.log('getAuction:' + error)
                     });
                     console.log('auctionInfo ', auctionInfo);
-                    if (options.page == 'wc_details_nft' && options.lang == 'en') {
+                    if (options.page === 'wc_details_nft' && options.lang === 'en') {
                         if (auctionInfo.seller.toLowerCase() === selectedAccount.toLowerCase()) {
                             document.querySelector("#cancel-auction").style.display = "inline-block";
                         }
@@ -332,7 +322,7 @@ async function fetchAccountData() {
                     let tokenURI = await nftContract.methods.tokenURI(tokenID).call().catch(function (error) {
                         console.log('tokenURI:' + error)
                     });
-                    if (options.page == 'wc_details_nft' && options.lang == 'en' && tokenURI.includes("ipfs://ipfs/")) {
+                    if (options.page === 'wc_details_nft' && options.lang === 'en' && tokenURI.includes("ipfs://ipfs/")) {
                         tokenURI = tokenURI.replace('ipfs://ipfs/', 'https://ipfs.io/ipfs/');
                     } else {
                         tokenURI = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
@@ -360,16 +350,16 @@ async function fetchAccountData() {
                         var deadline = new Date(parseInt(auctionInfo.deadline) * 1000);
 
                         if (parseInt(auctionInfo.deadline) < now) {
-                            var _buyNow = options.lang == 'en' ? "Buy now" : "Купить";
+                            var _buyNow = options.lang === 'en' ? "Buy now" : "Купить";
                             clone.querySelector(".bid").children[0].textContent = _buyNow;
                             console.log('clone.querySelector(".bid").children[0] ', clone.querySelector(".bid").children[0]);
                             let deadlineText = timeSince(auctionInfo.deadline);
                             clone.querySelector(".deadline").textContent = deadlineText;
                         } else {
                             let dur = duration(deadline, Date.now());
-                            var _in = options.lang == 'en' ? 'in ' : 'осталось ';
-                            var _days = options.lang == 'en' ? ' days,' : 'д.,';
-                            var _hours = options.lang == 'en' ? ' hours' : 'ч.';
+                            var _in = options.lang === 'en' ? 'in ' : 'осталось ';
+                            var _days = options.lang === 'en' ? ' days,' : 'д.,';
+                            var _hours = options.lang === 'en' ? ' hours' : 'ч.';
                             clone.querySelector(".deadline").textContent = _in + dur.days + _days + dur.hours + _hours;
                         }
 

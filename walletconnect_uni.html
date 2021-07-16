@@ -122,19 +122,19 @@
         document.querySelector("#amount").addEventListener("input", onAmountChange);
     });
     document.body.addEventListener('click', function (event) {
-        if (event.target.id == 'btn-connect') {
+        if (event.target.id === 'btn-connect') {
             onConnect()
         };
-        if (event.target.id == 'btn-disconnect') {
+        if (event.target.id === 'btn-disconnect') {
             onDisconnect()
         };
-        if (event.target.id == 'buy-obs') {
+        if (event.target.id === 'buy-obs') {
             onBuy()
         };
         // if (event.target.id == 'amount') {
         //     onAmountChange()
         // };
-        if (event.target.id == 'buy-obs-result') {
+        if (event.target.id === 'buy-obs-result') {
             onResultClick()
         };
     });
