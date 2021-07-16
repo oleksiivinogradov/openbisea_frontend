@@ -2166,6 +2166,7 @@ async function onMint() {
             public_profile_link: document.querySelector("#public_profile_link").value
         }
     };
+    console.log('JSON.stringify(body)',JSON.stringify(body));
 
     fetch('https://mac8.cfc.io/api/ipfsForNFT', {
             method: 'POST',
