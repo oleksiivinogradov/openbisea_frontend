@@ -569,7 +569,7 @@ async function onAmountChange() {
 
     let tokensForPurchaseAmountOBSResult = await openbisea.methods.purchaseTokensQuantityFor(purchaseAmount).call();
     console.log('tokensForPurchaseAmountOBSResult:', tokensForPurchaseAmountOBSResult);
-    document.querySelector("#obsamount").textContent = "You will receive:" + Number(parseFloat(tokensForPurchaseAmountOBSResult[0]) / (10 ** 18)).toFixed(2) + " OBS";
+    document.querySelector("#obsamount").textContent = langs[options.lang].purchaseOBSreceive + Number(parseFloat(tokensForPurchaseAmountOBSResult[0]) / (10 ** 18)).toFixed(2) + " OBS";
     document.querySelector("#buy-obs").disabled = false;
 }
 
@@ -631,7 +631,8 @@ const enObj = {
     walletconnectAuctuonsH1: "Auctions",
 
     purchaseOBS: "Purchase OBS",
-    purchaseOBSwarn: "must be minimum 0.1BNB to purchase OBS",
+    purchaseOBSwarn: "Must be minimum 0.1BNB to purchase OBS",
+    purchaseOBSreceive: "You will receive:",
 
 
     copy: "Copy",
@@ -708,6 +709,7 @@ const ruObj = {
 
     purchaseOBS: "Купить OBS",
     purchaseOBSwarn: "Минимум 0.1BNB для покупки OBS",
+    purchaseOBSreceive: "Вы получите:",
 
     copy: "Копировать",
     approve: "Подтвердить",
