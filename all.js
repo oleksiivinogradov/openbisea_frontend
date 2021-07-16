@@ -484,6 +484,8 @@ async function onResultClick() {
  * Buy button pressed.
  */
 async function onBuy() {
+    console.log('onBuy:');
+
     document.querySelector("#progress").style.display = "block";
 
     let countDots = 0;
