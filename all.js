@@ -136,6 +136,7 @@ async function fetchAccountData() {
             console.log("ownerOftokens", ownerOftoken);
         }
     }
+    console.log("selectedAccount", selectedAccount);
 
     document.querySelector("#selected-account").textContent = selectedAccount;
 
@@ -149,6 +150,8 @@ async function fetchAccountData() {
     // Go through all accounts and get their ETH balance
     const rowResolvers = accounts.map(async (address) => {
         const balance = await web3.eth.getBalance(address);
+        console.log("balance", balance);
+
         // ethBalance is a BigNumber instance
         // https://github.com/indutny/bn.js/
         const ethBalance = web3.utils.fromWei(balance, "ether");
@@ -159,6 +162,7 @@ async function fetchAccountData() {
         clone.querySelector(".balance").textContent = humanFriendlyBalance;
         accountContainer.appendChild(clone);
     });
+    console.log("rowResolvers", rowResolvers);
 
     // Because rendering account does its own RPC commucation
     // with Ethereum node, we do not want to display any results
