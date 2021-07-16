@@ -107,135 +107,135 @@
      */
 
         // Unpkg imports
-    const Web3Modal = window.Web3Modal.default;
-    const WalletConnectProvider = window.WalletConnectProvider.default;
-    const Fortmatic = window.Fortmatic;
-    const evmChains = window.evmChains;
-
-    // Web3modal instance
-    let web3Modal
-
-    // Chosen wallet provider given by the dialog window
-    let provider;
-
-    // Address of the selected account
-    let selectedAccount;
-
-    //bscan
-    let resultURL;
-    /**
-     * Setup the orchestra
-     */
-    function init () {
-
-        console.log("Initializing example");
-        console.log("WalletConnectProvider is", WalletConnectProvider);
-        console.log("Fortmatic is", Fortmatic);
-        console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
-
-        // Check that the web page is run in a secure context,
-        // as otherwise MetaMask won't be available
-        if (location.protocol !== 'https:') {
-            // https://ethereum.stackexchange.com/a/62217/620
-            const alert = document.querySelector("#alert-error-https");
-            alert.style.display = "block";
-            document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
-            return;
-        }
-
-        // Tell Web3modal what providers we have available.
-        // Built-in web browser provider (only one can exist as a time)
-        // like MetaMask, Brave or Opera is added automatically by Web3modal
-        const providerOptions = {
-            walletconnect: {
-                package: WalletConnectProvider,
-                options: {
-                    // Mikko's test key - don't copy as your mileage may vary
-                    infuraId: "bb7b522604e54a2f8ad251e7417b2355",
-                }
-            },
-
-            // fortmatic: {
-            //   package: Fortmatic,
-            //   options: {
-            //     // Mikko's TESTNET api key
-            //     key: "pk_test_391E26A3B43A3350"
-            //   }
-            // }
-        };
-
-        web3Modal = new Web3Modal({
-            cacheProvider: false, // optional
-            providerOptions, // required
-            disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
-        });
-
-        console.log("Web3Modal instance is", web3Modal);
-        let attempts = 0;
-        let sendOrderStatus = setInterval(async function () {
-            if (window.BinanceChain !== undefined) {
-                clearInterval(sendOrderStatus);
-                console.log("YES window.BinanceChain ");
-
-                const BinanceChain = window.BinanceChain;
-                provider = BinanceChain;
-
-                let currentChainId = BinanceChain.chainId;
-                console.log('currentChainId:' + currentChainId);
-
-                BinanceChain.on('chainChanged', handleChainChanged);
-
-                function handleChainChanged(_chainId) {
-                    // We recommend reloading the page, unless you must do otherwise
-                    window.location.reload();
-                }
-                let currentAccount = null;
-                BinanceChain
-                    .request({ method: 'eth_accounts' })
-                    .then(handleAccountsChanged)
-                    .catch((err) => {
-                        // Some unexpected error.
-                        // For backwards compatibility reasons, if no accounts are available,
-                        // eth_accounts will return an empty array.
-                        console.error(err);
-                    });
-
-                BinanceChain.on('accountsChanged', handleAccountsChanged);
-
-                function handleAccountsChanged(accounts) {
-                    if (accounts.length === 0) {
-                        // Binance Chain Wallet is locked or the user has not connected any accounts
-                        console.log('Please connect to Binance Chain Wallet.');
-                    } else if (accounts[0] !== currentAccount) {
-                        currentAccount = accounts[0];
-                        console.log('currentAccount:' + currentAccount);
-                        fetchAccountData ()
-                        // Do any other work!
-                    }
-                }
-                // BinanceChain
-                //     .request({ method: 'eth_requestAccounts' })
-                //     .then(handleAccountsChanged)
-                //     .catch((err) => {
-                //         if (err.code === 4001) {
-                //             // EIP-1193 userRejectedRequest error
-                //             // If this happens, the user rejected the connection request.
-                //             console.log('Please connect to MetaMask.');
-                //         } else {
-                //             console.error(err);
-                //         }
-                //     });
-
-            } else {
-                console.log("NO window.BinanceChain ");
-                attempts = attempts + 1;
-                if (attempts > 5) {
-                    clearInterval(sendOrderStatus);
-                }
-            }
-        }, 5000);
-
-    }
+    // const Web3Modal = window.Web3Modal.default;
+    // const WalletConnectProvider = window.WalletConnectProvider.default;
+    // const Fortmatic = window.Fortmatic;
+    // const evmChains = window.evmChains;
+    //
+    // // Web3modal instance
+    // let web3Modal
+    //
+    // // Chosen wallet provider given by the dialog window
+    // let provider;
+    //
+    // // Address of the selected account
+    // let selectedAccount;
+    //
+    // //bscan
+    // let resultURL;
+    // /**
+    //  * Setup the orchestra
+    //  */
+    // function init () {
+    //
+    //     console.log("Initializing example");
+    //     console.log("WalletConnectProvider is", WalletConnectProvider);
+    //     console.log("Fortmatic is", Fortmatic);
+    //     console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
+    //
+    //     // Check that the web page is run in a secure context,
+    //     // as otherwise MetaMask won't be available
+    //     if (location.protocol !== 'https:') {
+    //         // https://ethereum.stackexchange.com/a/62217/620
+    //         const alert = document.querySelector("#alert-error-https");
+    //         alert.style.display = "block";
+    //         document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
+    //         return;
+    //     }
+    //
+    //     // Tell Web3modal what providers we have available.
+    //     // Built-in web browser provider (only one can exist as a time)
+    //     // like MetaMask, Brave or Opera is added automatically by Web3modal
+    //     const providerOptions = {
+    //         walletconnect: {
+    //             package: WalletConnectProvider,
+    //             options: {
+    //                 // Mikko's test key - don't copy as your mileage may vary
+    //                 infuraId: "bb7b522604e54a2f8ad251e7417b2355",
+    //             }
+    //         },
+    //
+    //         // fortmatic: {
+    //         //   package: Fortmatic,
+    //         //   options: {
+    //         //     // Mikko's TESTNET api key
+    //         //     key: "pk_test_391E26A3B43A3350"
+    //         //   }
+    //         // }
+    //     };
+    //
+    //     web3Modal = new Web3Modal({
+    //         cacheProvider: false, // optional
+    //         providerOptions, // required
+    //         disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
+    //     });
+    //
+    //     console.log("Web3Modal instance is", web3Modal);
+    //     let attempts = 0;
+    //     let sendOrderStatus = setInterval(async function () {
+    //         if (window.BinanceChain !== undefined) {
+    //             clearInterval(sendOrderStatus);
+    //             console.log("YES window.BinanceChain ");
+    //
+    //             const BinanceChain = window.BinanceChain;
+    //             provider = BinanceChain;
+    //
+    //             let currentChainId = BinanceChain.chainId;
+    //             console.log('currentChainId:' + currentChainId);
+    //
+    //             BinanceChain.on('chainChanged', handleChainChanged);
+    //
+    //             function handleChainChanged(_chainId) {
+    //                 // We recommend reloading the page, unless you must do otherwise
+    //                 window.location.reload();
+    //             }
+    //             let currentAccount = null;
+    //             BinanceChain
+    //                 .request({ method: 'eth_accounts' })
+    //                 .then(handleAccountsChanged)
+    //                 .catch((err) => {
+    //                     // Some unexpected error.
+    //                     // For backwards compatibility reasons, if no accounts are available,
+    //                     // eth_accounts will return an empty array.
+    //                     console.error(err);
+    //                 });
+    //
+    //             BinanceChain.on('accountsChanged', handleAccountsChanged);
+    //
+    //             function handleAccountsChanged(accounts) {
+    //                 if (accounts.length === 0) {
+    //                     // Binance Chain Wallet is locked or the user has not connected any accounts
+    //                     console.log('Please connect to Binance Chain Wallet.');
+    //                 } else if (accounts[0] !== currentAccount) {
+    //                     currentAccount = accounts[0];
+    //                     console.log('currentAccount:' + currentAccount);
+    //                     fetchAccountData ()
+    //                     // Do any other work!
+    //                 }
+    //             }
+    //             // BinanceChain
+    //             //     .request({ method: 'eth_requestAccounts' })
+    //             //     .then(handleAccountsChanged)
+    //             //     .catch((err) => {
+    //             //         if (err.code === 4001) {
+    //             //             // EIP-1193 userRejectedRequest error
+    //             //             // If this happens, the user rejected the connection request.
+    //             //             console.log('Please connect to MetaMask.');
+    //             //         } else {
+    //             //             console.error(err);
+    //             //         }
+    //             //     });
+    //
+    //         } else {
+    //             console.log("NO window.BinanceChain ");
+    //             attempts = attempts + 1;
+    //             if (attempts > 5) {
+    //                 clearInterval(sendOrderStatus);
+    //             }
+    //         }
+    //     }, 5000);
+    //
+    // }
 
     /**
      * Buy button pressed.
