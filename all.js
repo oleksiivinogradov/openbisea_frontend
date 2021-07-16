@@ -497,21 +497,23 @@ async function onBuy() {
     }, 1000);
     const web3 = new Web3(provider);
     const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-        document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
+    if (chainId !== 56 && chainId !== 97 && chainId !== 137) {
+        document.querySelector("#obsamount").textContent = "We support only BSC and MATIC mainnet";
         document.querySelector("#buy-obs").disabled = true;
         document.querySelector("#progress").style.display = "none";
         return;
     }
     let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+    if (chainId === 137) openbiseaAddress = "0x424E231FBd3f74Ab9D85D1cf7de2d242D96d8ea4";
+
     const openbiseaABI = _openbiseaABI;
     const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
 
     const amountText = document.querySelector("#amount").value;
     const amountDouble = parseFloat(amountText);
     if (amountDouble <= 0.1) {
-        document.querySelector("#obsamount").textContent = "must be minimum 0.1BNB to purcase OBS";
+        document.querySelector("#obsamount").textContent = "must be minimum 0.1 to purcase OBS";
         document.querySelector("#buy-obs").disabled = true;
         document.querySelector("#progress").style.display = "none";
         return;
@@ -535,6 +537,7 @@ async function onBuy() {
         document.querySelector("#buy-obs-result").style.display = "inline-block";
         resultURL = "https://bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
         if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + purchaseTokensOBSResult.transactionHash
+        if (chainId === 137) resultURL = "https://polygonscan.com/tx/" + purchaseTokensOBSResult.transactionHash
         document.querySelector("#progress").style.display = "none";
     } else {
         // document.querySelector("#obsamount").textContent = "Result undefined";
@@ -549,13 +552,15 @@ async function onBuy() {
 async function onAmountChange() {
     const web3 = new Web3(provider);
     const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-        document.querySelector("#obsamount").textContent = "We support only BSC mainnet";
+    if (chainId !== 56 && chainId !== 97 && chainId !== 137) {
+        document.querySelector("#obsamount").textContent = "We support only BSC or MATIC mainnet";
         document.querySelector("#buy-obs").disabled = true;
         return;
     }
     let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+    if (chainId === 137) openbiseaAddress = "0x424E231FBd3f74Ab9D85D1cf7de2d242D96d8ea4";
+
     const openbiseaABI = _openbiseaABI;
     const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
     const amountText = document.querySelector("#amount").value;
@@ -633,7 +638,7 @@ const enObj = {
     walletconnectAuctuonsH1: "Auctions",
 
     purchaseOBS: "Purchase OBS",
-    purchaseOBSwarn: "Must be minimum 0.1BNB to purchase OBS",
+    purchaseOBSwarn: "Must be minimum 0.1 to purchase OBS",
     purchaseOBSreceive: "You will receive:",
 
 
