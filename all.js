@@ -682,7 +682,7 @@ const ruObj = {
 
     httpsWarning: "Вы можете запустить этот пример только через HTTPS-соединение.",
 
-    noWalletWarning1: "Кошелек не подключен. Подключите кошелек чтобы увидить ваши аккаунты и балансы в BNB.",
+    noWalletWarning1: "Кошелек не подключен. Подключите кошелек чтобы увидить ваши аккаунты и балансы.",
     noWalletWarning2: "Подключить кошелек",
 
     network1: "Сеть:",
@@ -703,7 +703,7 @@ const ruObj = {
 
     accountBalance1: "Балансы всех аккаунтов",
     accountBalance2: "Адрес",
-    accountBalance3: "баланс BNB",
+    accountBalance3: "баланс",
     accountBalance4: "Можете переключится между аккаунтами, если ваш кошелек поддерживает эту опцию.",
 
     walletconnectH1: "Купить токен OBS",
