@@ -168,8 +168,11 @@ async function fetchAccountData() {
     // with Ethereum node, we do not want to display any results
     // until data for all accounts is loaded
     await Promise.all(rowResolvers);
+    console.log('1 rowResolve:' + options.rowResolve)
 
     if (options.rowResolve) {
+        console.log('2 rowResolve:' + options.rowResolve)
+
         const erc721abi = _erc721abi;
         const openbiseaABI = _openbiseaABI;
         const openbisea = new web3.eth.Contract(openbiseaABI, _openbiseaAddress);
