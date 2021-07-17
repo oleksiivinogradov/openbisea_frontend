@@ -1574,8 +1574,8 @@ async function onBidClick(element) {
     }
     element.disabled = true;
 
-    let nftContractAddress = "0xb861DF245fc18483235D9C11b87d8A76F4678e08";
-    if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
+    let nftContractAddress = auctionInfo.contract;//"0xb861DF245fc18483235D9C11b87d8A76F4678e08";
+    // if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
     if (contractSaved !== undefined) {
         nftContractAddress = contractSaved
     }
