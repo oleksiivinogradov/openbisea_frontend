@@ -1821,94 +1821,94 @@ async function onAllowClick(element) {
     clearInterval(sendOrderStatus);
 }
 
-async function onBidClick(element) {
-    var element = event.target || event.srcElement;
-    console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
-    const auctionInfo = auctionsNormalized[element.parentNode.parentNode.rowIndex];
-
-    document.querySelector("#progress").style.display = "block";
-
-    let countDots = 0;
-    let sendOrderStatus = setInterval(async function () {
-        let phrase = "Transaction in progress " + ".".repeat(countDots);
-        document.querySelector("#progress").textContent = phrase;
-        countDots++;
-        if (countDots === 4) countDots = 0;
-    }, 1000);
-
-    const web3 = new Web3(provider);
-    const chainId = await web3.eth.getChainId();
-    if (chainId !== 56 && chainId !== 97) {
-        document.querySelector("#progress").textContent = "We support only BSC mainnet";
-        element.disabled = true;
-        // document.querySelector("#progress").style.display = "none";
-        return;
-    }
-
-    let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
-    if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
-    const openbiseaABI = _openbiseaABI;
-    const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
-
-    console.log("1", element.parentNode.parentNode);
-    console.log("2", element.parentNode.parentNode.children[4]);
-    console.log("3", element.parentNode.parentNode.children[4].children[0]);
-
-    const amountText = element.parentNode.parentNode.children[4].children[0].value;
-    const amountDouble = parseFloat(amountText);
-    if (amountDouble <= auctionInfo.priceDouble) {
-        document.querySelector("#progress").textContent = "must be more than last bid";
-        element.disabled = true;
-        // document.querySelector("#progress").style.display = "none";
-        return;
-    }
-    element.disabled = true;
-
-    let nftContractAddress = auctionInfo.contract; //"0xb861DF245fc18483235D9C11b87d8A76F4678e08";
-    if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
-
-    const purchaseAmount = Number(parseFloat(amountText) * (10 ** 18)).toFixed(0) + '';
-    let bidResult
-    console.log("auctionInfo", auctionInfo);
-    console.log("purchaseAmount", purchaseAmount);
-    console.log("amountText", amountText);
-    console.log("element.parentNode", element.parentNode);
-    console.log("element.parentNode.parentNode", element.parentNode.parentNode);
-
-    if (auctionInfo.isUSD === true) {
-        // NEED allowance.
-        bidResult = await openbisea.methods.bidUSD(nftContractAddress, auctionInfo.tokenID + "", purchaseAmount, false).send({
-            from: selectedAccount,
-            gas: 500000
-        }).catch((err) => {
-            console.log('err->' + JSON.stringify(err));
-            document.querySelector("#progress").textContent = err.message;
-        });
-    } else {
-        bidResult = await openbisea.methods.bid(nftContractAddress, auctionInfo.tokenID + "", false).send({
-            from: selectedAccount,
-            value: purchaseAmount,
-            gas: 500000
-        }).catch((err) => {
-            console.log('err->' + JSON.stringify(err));
-            document.querySelector("#progress").textContent = err.message;
-        });
-    }
-
-    if (bidResult !== undefined) {
-        console.log('bidResult:', bidResult.transactionHash);
-        element.disabled = false;
-        document.querySelector("#buy-obs-result").style.display = "inline-block";
-        resultURL = "https://bscscan.com/tx/" + bidResult.transactionHash
-        if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + bidResult.transactionHash
-        document.querySelector("#progress").style.display = "none";
-    } else {
-        // document.querySelector("#obsamount").textContent = "Result undefined";
-        document.querySelector("#progress").style.display = "none";
-    }
-
-    clearInterval(sendOrderStatus);
-}
+// async function onBidClick(element) {
+//     var element = event.target || event.srcElement;
+//     console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
+//     const auctionInfo = auctionsNormalized[element.parentNode.parentNode.rowIndex];
+//
+//     document.querySelector("#progress").style.display = "block";
+//
+//     let countDots = 0;
+//     let sendOrderStatus = setInterval(async function () {
+//         let phrase = "Transaction in progress " + ".".repeat(countDots);
+//         document.querySelector("#progress").textContent = phrase;
+//         countDots++;
+//         if (countDots === 4) countDots = 0;
+//     }, 1000);
+//
+//     const web3 = new Web3(provider);
+//     const chainId = await web3.eth.getChainId();
+//     if (chainId !== 56 && chainId !== 97) {
+//         document.querySelector("#progress").textContent = "We support only BSC mainnet";
+//         element.disabled = true;
+//         // document.querySelector("#progress").style.display = "none";
+//         return;
+//     }
+//
+//     let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
+//     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
+//     const openbiseaABI = _openbiseaABI;
+//     const openbisea = new web3.eth.Contract(openbiseaABI, openbiseaAddress);
+//
+//     console.log("1", element.parentNode.parentNode);
+//     console.log("2", element.parentNode.parentNode.children[4]);
+//     console.log("3", element.parentNode.parentNode.children[4].children[0]);
+//
+//     const amountText = element.parentNode.parentNode.children[4].children[0].value;
+//     const amountDouble = parseFloat(amountText);
+//     if (amountDouble <= auctionInfo.priceDouble) {
+//         document.querySelector("#progress").textContent = "must be more than last bid";
+//         element.disabled = true;
+//         // document.querySelector("#progress").style.display = "none";
+//         return;
+//     }
+//     element.disabled = true;
+//
+//     let nftContractAddress = auctionInfo.contract; //"0xb861DF245fc18483235D9C11b87d8A76F4678e08";
+//     //if (chainId === 97) nftContractAddress = "0x4F59D55D1c91fFD3267d560C37605409A7c885b9";
+//
+//     const purchaseAmount = Number(parseFloat(amountText) * (10 ** 18)).toFixed(0) + '';
+//     let bidResult
+//     console.log("auctionInfo", auctionInfo);
+//     console.log("purchaseAmount", purchaseAmount);
+//     console.log("amountText", amountText);
+//     console.log("element.parentNode", element.parentNode);
+//     console.log("element.parentNode.parentNode", element.parentNode.parentNode);
+//
+//     if (auctionInfo.isUSD === true) {
+//         // NEED allowance.
+//         bidResult = await openbisea.methods.bidUSD(nftContractAddress, auctionInfo.tokenID + "", purchaseAmount, false).send({
+//             from: selectedAccount,
+//             gas: 500000
+//         }).catch((err) => {
+//             console.log('err->' + JSON.stringify(err));
+//             document.querySelector("#progress").textContent = err.message;
+//         });
+//     } else {
+//         bidResult = await openbisea.methods.bid(nftContractAddress, auctionInfo.tokenID + "", false).send({
+//             from: selectedAccount,
+//             value: purchaseAmount,
+//             gas: 500000
+//         }).catch((err) => {
+//             console.log('err->' + JSON.stringify(err));
+//             document.querySelector("#progress").textContent = err.message;
+//         });
+//     }
+//
+//     if (bidResult !== undefined) {
+//         console.log('bidResult:', bidResult.transactionHash);
+//         element.disabled = false;
+//         document.querySelector("#buy-obs-result").style.display = "inline-block";
+//         resultURL = "https://bscscan.com/tx/" + bidResult.transactionHash
+//         if (chainId === 97) resultURL = "http://testnet.bscscan.com/tx/" + bidResult.transactionHash
+//         document.querySelector("#progress").style.display = "none";
+//     } else {
+//         // document.querySelector("#obsamount").textContent = "Result undefined";
+//         document.querySelector("#progress").style.display = "none";
+//     }
+//
+//     clearInterval(sendOrderStatus);
+// }
 
 
 //walletconnect_auction_create_uni.html
