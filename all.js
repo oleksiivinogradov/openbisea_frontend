@@ -237,6 +237,7 @@ async function fetchAccountData() {
                         if (auctionInfo.isUSD === true) price = priceFloat + " USD";
                         clone.querySelector(".price").textContent = price;
                         clone.querySelector(".bidAmount").children[0].value = Math.round((priceFloat + 0.00001) * 100000) / 100000;
+                        clone.querySelector(".bidAmount").children[0].style.color='#000';
 
                         if (auctionInfo.isUSD === true) {
                             clone.querySelector(".allow").children[0].style.display = "block"
@@ -354,7 +355,6 @@ async function fetchAccountData() {
                         if (auctionInfo.isUSD === true) price = priceFloat + " USD";
                         clone.querySelector(".price").textContent = price;
                         clone.querySelector(".bidAmount").children[0].value = Math.round((priceFloat + 0.00001) * 100000) / 100000;
-                        clone.querySelector(".bidAmount").children[0].style.color='#000';
 
                         if (auctionInfo.isUSD === true) {
                             clone.querySelector(".allow").children[0].style.display = "block"
