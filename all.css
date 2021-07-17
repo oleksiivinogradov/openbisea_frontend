@@ -31,7 +31,7 @@ body{
 }
 
 #template-auction tr th.bidAmount input {
-    color: black;
+    color: #000000;
     border: 1px solid #fafafa;
     box-shadow: 0 0 5px #fcbd24;
     -webkit-box-shadow: 0 0 6px #fcbd24;
