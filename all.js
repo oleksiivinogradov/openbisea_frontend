@@ -2257,7 +2257,7 @@ async function onMint() {
                 const tokenId = mintNFTResult.events.Transfer.returnValues.tokenId
                 document.querySelector("#progress").textContent = "Your link to share: https://openbisea.io/detailsnft?tokenID=" + tokenId;
                 console.log('tokenId:', tokenId);
-                nftDetailsURL = "https://openbisea.io/detailsnft?tokenID=" + tokenId;
+                nftDetailsURL = "https://openbisea.io/detailsnft-v2?tokenID=" + tokenId;
                 // document.querySelector("#progress").style.display = "none";
 
                 document.querySelector("#mint").disabled = false;
