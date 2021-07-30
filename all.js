@@ -514,7 +514,7 @@ async function onBuy() {
         document.querySelector("#progress").style.display = "none";
         return;
     }
-    let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
+    let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
     if (chainId === 137) openbiseaAddress = "0x424E231FBd3f74Ab9D85D1cf7de2d242D96d8ea4";
 
@@ -568,7 +568,7 @@ async function onAmountChange() {
         document.querySelector("#buy-obs").disabled = true;
         return;
     }
-    let openbiseaAddress = '0x1Bf12f0650d8065fFCE3Cd9111feDEC21deF6825';
+    let openbiseaAddress = '0x7b1AC460c155ABb6b1D02b543952426A6aaF6b72';
     if (chainId === 97) openbiseaAddress = "0x66Ddd56AB8F961a31Ef344086589D53Ee0b6944a";
     if (chainId === 137) openbiseaAddress = "0x424E231FBd3f74Ab9D85D1cf7de2d242D96d8ea4";
 
