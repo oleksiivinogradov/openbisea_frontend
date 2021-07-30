@@ -27,11 +27,16 @@
     .listing-item{
       display: flex;
       flex-direction: column;
-      margin: 20px 40px;
+      margin: 20px ;
     }
     .allow{
         text-align: center;
         margin: 10px auto;
+    }
+    .allow .btn{
+        background-color: #fcbd24;
+        color:black;
+        display: none
     }
     .listing-item-price{
       font-size: 12px;
@@ -195,7 +200,7 @@
 
                 
                 <div class="allow">
-                    <button class="btn btn-primary" style="background-color: #fcbd24;color:black;display: none" onclick="onAllowClick(this)"> Approve </button>
+                    <button class="btn btn-primary" onclick="onAllowClick(this)"> Approve </button>
                 </div>
                 <div class="bidAmount">
                     <input type="number" placeholder="bid amount" name="Amount" value=""/>
@@ -650,9 +655,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.log('auctionInfo ', auctionInfo);
                 let tokenURI = await nftContract.methods.tokenURI(tokenID).call().catch(function (error) {console.log('tokenURI:' + error)});
                 if (tokenURI.includes("ipfs://ipfs/")) {
-                    tokenURI = tokenURI.replace('ipfs://ipfs/', 'https://ipfs.io/ipfs/');
+                    tokenURI = tokenURI.replace('ipfs://ipfs/', 'https://openbisea.mypinata.cloud/ipfs/');
                 } else {
-                    tokenURI = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                    tokenURI = tokenURI.replace('ipfs://', 'https://openbisea.mypinata.cloud/ipfs/');
                 }
                 let response = await fetch(tokenURI);
 
