@@ -180,11 +180,11 @@
             <div class="listing-item">
                 <div lass="image">
                     <img data-src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" class="listing-item-img lazy" alt="" onclick="onOpenImageClick(this)">
-                    <!-- <button class="btn btn-primary" id="openImage" style="background-color: #fcbd24;color:black;" onclick="onOpenImageClick(this)"> Copy </button> -->
                 </div>
                 
                 
                 <div class="name listing-item-name"></div>
+                <div class="index"></div>
                 <div class="listing-item-price">price</div>
                 <div class="price listing-item-price-number"></div>
 
@@ -662,6 +662,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     // console.log('tokenMetadata ', tokenMetadata);
                     const clone = templateAuction.content.cloneNode(true);
                     clone.querySelector(".name").textContent = tokenMetadata.name;
+                    clone.querySelector(".index").textContent = index;
                     // clone.querySelector(".image").textContent = 'image';
                     // clone.querySelector(".image").href = tokenMetadata.image.replace('ipfs://','https://ipfs.io/ipfs/');
                     const priceFloat = parseFloat(await web3.utils.fromWei(auctionInfo.price))
@@ -800,23 +801,60 @@ document.addEventListener("DOMContentLoaded", function() {
     /**
      * onResultClick button pressed.
      */
-    async function onResultClick () {
-        window.open(resultURL, '_blank').focus();
-    }
-    function  getId(element) {
-        alert("row" + element.parentNode.parentNode.rowIndex +
-            " - column" + element.parentNode.cellIndex);
-    }
-    function copyToClipboard(text) {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-    }
-    async function onOpenImageClick (element) {
-        let text = 'https://openbisea.io/detailsnft-v2?tokenID=' + auctionsNormalized[element.parentNode.parentNode.rowIndex].tokenID + "&contract=" + auctionsNormalized[element.parentNode.parentNode.rowIndex].contract;
+     async function onResultClick () {
+    window.open(resultURL, '_blank').focus();
+  }
+  function  getId(element) {
+    alert("row" + element.parentNode.parentNode.rowIndex +
+      " - column" + element.parentNode.cellIndex);
+  }
+  function copyToClipboard(text) {
+    window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+  }
+  async function onOpenImageClick (element) {
 
-        console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex + " text: " + text);
-        copyToClipboard(text)
-        // window.open(auctionsNormalized[element.parentNode.parentNode.rowIndex].image, '_blank').focus();
-    }
+    console.log("row index" + element.parentNode.parentNode.querySelector('.index') + " - column" + element.parentNode.cellIndex + " text: " + text);
+
+    let text = 'https://openbisea.io/detailsnft-v2?tokenID=' + auctionsNormalized[element.parentNode.parentNode.rowIndex].tokenID + "&contract=" + auctionsNormalized[element.parentNode.parentNode.rowIndex].contract;
+
+    console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex + " text: " + text);
+   
+    copyToClipboard(text)
+    // window.open(auctionsNormalized[element.parentNode.parentNode.rowIndex].image, '_blank').focus();
+  }
+    // async function onResultClick () {
+    //     window.open(resultURL, '_blank').focus();
+    // }
+    // function  getId(element) {
+    //     alert("row" + element.parentNode.parentNode.rowIndex +
+    //         " - column" + element.parentNode.cellIndex);
+    // }
+    // function copyToClipboard(text) {
+    //     window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+    // }
+    // async function onOpenImageClick (element) {
+       
+    //     let foo1 = Array.prototype.indexOf.call(element.parentNode, element);
+    //     let foo2 = Array.prototype.indexOf.call(element.parentNode.parentNode, element);
+    //     let foo3 = Array.prototype.indexOf.call(element.parentNode.parentNode.parentNode, element);
+    //     let foo4 = Array.prototype.indexOf.call(element.parentNode.parentNode.parentNode.parentNode, element);
+    //     console.log(
+    //         "-> ",
+    //         foo1,
+    //         foo2,
+    //         foo3,
+    //         foo4,
+    //         element,
+    //         element.parentNode.parentNode,
+    //         element.parentNode.parentNode.rowIndex,
+    //         auctionsNormalized
+    //     );
+    //     let text = 'https://openbisea.io/detailsnft-v2?tokenID=' + auctionsNormalized[element.parentNode.parentNode.rowIndex].tokenID + "&contract=" + auctionsNormalized[element.parentNode.parentNode.rowIndex].contract;
+
+    //     console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex + " text: " + text);
+    //     copyToClipboard(text)
+    //     // window.open(auctionsNormalized[element.parentNode.parentNode.rowIndex].image, '_blank').focus();
+    // }
     async function onAllowClick (element) {
         console.log("row" + element.parentNode.parentNode.rowIndex + " - column" + element.parentNode.cellIndex);
         const auctionInfo = auctionsNormalized[element.parentNode.parentNode.rowIndex];
