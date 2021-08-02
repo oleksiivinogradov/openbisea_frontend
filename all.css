@@ -1,7 +1,8 @@
-body{
+body {
     background: transparent;
     color: #fff;
 }
+
 .container {
     margin: 0 auto;
     text-align: center;
@@ -39,7 +40,7 @@ body{
 }
 
 /* walletconnect_auction_create_ru page style */
-#connected > input {
+#connected>input {
     color: black;
     border: 1px solid #fafafa;
     box-shadow: 0 0 5px #fcbd24;
@@ -82,7 +83,7 @@ body{
     box-shadow: 0 0 5px #F2BE4B;
     -webkit-box-shadow: 0 0 6px #F2BE4B;
     -moz-box-shadow: 0 0 5px #F2BE4B;
-    color:black;
+    color: black;
 }
 
 #image {
@@ -120,4 +121,107 @@ body{
     -webkit-box-shadow: 0 0 6px #fcbd24;
     -moz-box-shadow: 0 0 5px #fcbd24;
     color: black;
+}
+
+/* /auctions-v2 */
+.listing {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    flex-wrap: wrap;
+}
+
+.listing-item {
+    padding: 10px;
+    border: 1px solid #eee;
+    transition: all .7s;
+    background-color: #fff;
+    color: #222;
+}
+
+.listing-item:hover {
+    border: 1px solid #222;
+}
+
+.listing-item-img {
+    max-width: 250px;
+}
+
+.listing-item-name {
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.listing-item {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+}
+
+.allow {
+    text-align: center;
+    margin: 10px auto;
+}
+
+.allow .btn {
+    background-color: #fcbd24;
+    color: black;
+    display: none
+}
+
+.listing-item-price {
+    font-size: 12px;
+    margin-bottom: 0px;
+}
+
+.listing-item-price-number {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.listing-item-buynow .btn {
+    width: auto;
+    display: inline-block;
+    border-color: #2e6da4;
+    background-color: #fcbd24;
+    color: black;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.bidAmount {
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.bidAmount input {
+    text-align: right;
+    color: black;
+    border: 1px solid #fafafa;
+    -webkit-box-shadow: 0 0 6px #fcbd24;
+    -moz-box-shadow: 0 0 5px #fcbd24;
+    box-shadow: 0 0 5px #fcbd24;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #fcbd25;
+}
+
+.bidAmount input:focus-visible {
+    box-shadow: none;
+    border: 1px solid #2e6da4;
+}
+
+.bidAmount .btn-primary {
+    background-color: #fcbd24;
+    color: black;
+    margin: 0 10px;
+    font-weight: 600;
+}
+
+@media screen and (max-width:767.9px) {
+    .listing-item {
+        width: 100%;
+    }
 }

@@ -1,89 +1,10 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 <style type="text/css">
-    
-    .listing{
-      display: flex;
-      width: 100%;
-      max-width: 1200px;
-      flex-wrap: wrap;
+    body{
+        background: transparent !important;
+        color: #fff;
     }
-    .listing-item{
-        padding: 10px;
-        border: 1px solid #eee;
-        transition: all .7s ;
-    }
-    .listing-item:hover{
-        border: 1px solid #222;
-    }
-    .listing-item-img{
-      max-width: 250px;
-    }
-    .listing-item-name{
-      font-weight: 700;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-    .listing-item{
-      display: flex;
-      flex-direction: column;
-      margin: 20px ;
-    }
-    .allow{
-        text-align: center;
-        margin: 10px auto;
-    }
-    .allow .btn{
-        background-color: #fcbd24;
-        color:black;
-        display: none
-    }
-    .listing-item-price{
-      font-size: 12px;
-      margin-bottom: 0px;
-    }
-    .listing-item-price-number{
-      font-size: 16px;
-      font-weight: 700;
-    }
-    .listing-item-buynow .btn{
-      width: auto;
-      display: inline-block;
-      border-color: #2e6da4;
-      background-color: #fcbd24;
-      color: black;
-      font-weight: 700;
-      margin-top: 10px;
-    }
-    .bidAmount{
-        display: flex;
-        justify-content: center;
-        align-items: center
-    }
-
-    .bidAmount input{ 
-        text-align: right; 
-        color:black;
-        border:1px solid #fafafa;
-        -webkit-box-shadow:0 0 6px #fcbd24;
-        -moz-box-shadow:0 0 5px #fcbd24;
-        box-shadow:0 0 5px #fcbd24;
-        padding: 5px;
-        text-align: center;
-        border: 1px solid #fcbd25;
-    }
-    .bidAmount input:focus-visible{
-        box-shadow: none;
-        border: 1px solid #2e6da4;
-    }
-    .bidAmount .btn-primary {
-        background-color: #fcbd24;
-        color:black;
-        margin: 0 10px;
-        font-weight: 600;
-    }
-
-
 </style>
 
 <div class="container" style="display: table;margin-right: auto;margin-left: auto;text-align:center;">
@@ -120,8 +41,6 @@
 
                     <tbody id="auctions">
                     </tbody>
-
-
                 </table> -->
                 
                 <div id="auctions" class="listing"></div>
@@ -185,12 +104,10 @@
             <div class="listing-item">
                 <div lass="image">
                     <img src="" data-src="" class="listing-item-img lazy" alt="" onclick="onOpenImageClick(this)">
-                    <!-- <img data-src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" class="listing-item-img lazy" alt="" onclick="onOpenImageClick(this)"> -->
                 </div>
                 
                 
                 <div class="name listing-item-name"></div>
-                <div class="index"></div>
                 <div class="listing-item-price">price</div>
                 <div class="price listing-item-price-number"></div>
 
@@ -250,9 +167,7 @@
 <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.js"></script>
-
-
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.js"></script>
 
 
 
@@ -620,7 +535,7 @@
                     // console.log('tokenMetadata ', tokenMetadata);
                     const clone = templateAuction.content.cloneNode(true);
                     clone.querySelector(".name").textContent = tokenMetadata.name;
-                    clone.querySelector(".index").textContent = index;
+                    //clone.querySelector(".index").textContent = index;
 
                     // clone.querySelector(".image").textContent = 'image';
                     // clone.querySelector(".image").href = tokenMetadata.image.replace('ipfs://','https://ipfs.io/ipfs/');
