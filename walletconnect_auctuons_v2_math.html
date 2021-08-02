@@ -184,7 +184,8 @@
 
             <div class="listing-item">
                 <div lass="image">
-                    <img data-src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" class="listing-item-img lazy" alt="" onclick="onOpenImageClick(this)">
+                    <img src="" data-src="" class="listing-item-img lazy" alt="" onclick="onOpenImageClick(this)">
+                    <!-- <img data-src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" src="https://public.nftstatic.com/static/nft/zipped/ece913c63d284339a3c50f1c8b9ecf5e_zipped.jpeg" class="listing-item-img lazy" alt="" onclick="onOpenImageClick(this)"> -->
                 </div>
                 
                 
@@ -249,63 +250,68 @@
 <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.js"></script>
 
 
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  var lazyloadImages;    
+//     $(document).on('DOMNodeInserted', 'img.lazy', function() {
+//   var lazyloadImages;    
 
-  if ("IntersectionObserver" in window) {
-    lazyloadImages = document.querySelectorAll(".lazy");
-    var imageObserver = new IntersectionObserver(function(entries, observer) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          var image = entry.target;
-          image.src = image.dataset.src;
-          image.classList.remove("lazy");
-          imageObserver.unobserve(image);
-        }
-      });
-    });
+//   if ("IntersectionObserver" in window) {
+//     lazyloadImages = document.querySelectorAll(".lazy");
+//     var imageObserver = new IntersectionObserver(function(entries, observer) {
+//       entries.forEach(function(entry) {
+//         if (entry.isIntersecting) {
+//           var image = entry.target;
+//           image.src = image.dataset.src;
+//           image.classList.remove("lazy");
+//           imageObserver.unobserve(image);
+//         }
+//       });
+//     });
 
-    lazyloadImages.forEach(function(image) {
-      imageObserver.observe(image);
-    });
-  } else {  
-    var lazyloadThrottleTimeout;
-    lazyloadImages = document.querySelectorAll(".lazy");
+//     lazyloadImages.forEach(function(image) {
+//       imageObserver.observe(image);
+//     });
+//   } else {  
+//     var lazyloadThrottleTimeout;
+//     lazyloadImages = document.querySelectorAll(".lazy");
     
-    function lazyload () {
-      if(lazyloadThrottleTimeout) {
-        clearTimeout(lazyloadThrottleTimeout);
-      }    
+//     function lazyload () {
+//       if(lazyloadThrottleTimeout) {
+//         clearTimeout(lazyloadThrottleTimeout);
+//       }    
 
-      lazyloadThrottleTimeout = setTimeout(function() {
-        var scrollTop = window.pageYOffset;
-        lazyloadImages.forEach(function(img) {
-            if(img.offsetTop < (window.innerHeight + scrollTop)) {
-              img.src = img.dataset.src;
-              img.classList.remove('lazy');
-            }
-        });
-        if(lazyloadImages.length == 0) { 
-          document.removeEventListener("scroll", lazyload);
-          window.removeEventListener("resize", lazyload);
-          window.removeEventListener("orientationChange", lazyload);
-        }
-      }, 20);
-    }
+//       lazyloadThrottleTimeout = setTimeout(function() {
+//         var scrollTop = window.pageYOffset;
+//         lazyloadImages.forEach(function(img) {
+//             if(img.offsetTop < (window.innerHeight + scrollTop)) {
+//               img.src = img.dataset.src;
+//               img.classList.remove('lazy');
+//             }
+//         });
+//         if(lazyloadImages.length == 0) { 
+//           document.removeEventListener("scroll", lazyload);
+//           window.removeEventListener("resize", lazyload);
+//           window.removeEventListener("orientationChange", lazyload);
+//         }
+//       }, 20);
+//     }
 
-    document.addEventListener("scroll", lazyload);
-    window.addEventListener("resize", lazyload);
-    window.addEventListener("orientationChange", lazyload);
-  }
-})
+//     document.addEventListener("scroll", lazyload);
+//     window.addEventListener("resize", lazyload);
+//     window.addEventListener("orientationChange", lazyload);
+//   }
+//})
+
+
   </script>
 
 <script>
     "use strict";
+
+
 
     /**
      * Example JavaScript code that interacts with the page and Web3 wallets
@@ -543,6 +549,7 @@ document.addEventListener("DOMContentLoaded", function() {
      */
     async function fetchAccountData () {
 
+
         auctionsNormalized = {};
         // Get a Web3 instance for the wallet
         const web3 = new Web3(provider);
@@ -668,6 +675,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     const clone = templateAuction.content.cloneNode(true);
                     clone.querySelector(".name").textContent = tokenMetadata.name;
                     clone.querySelector(".index").textContent = index;
+
                     // clone.querySelector(".image").textContent = 'image';
                     // clone.querySelector(".image").href = tokenMetadata.image.replace('ipfs://','https://ipfs.io/ipfs/');
                     const priceFloat = parseFloat(await web3.utils.fromWei(auctionInfo.price))
@@ -698,8 +706,22 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (tokenMetadata.image.includes("ipfs://ipfs/")) {
                         image = tokenMetadata.image.replace('ipfs://ipfs/', 'https://ipfs.io/ipfs/');
                     } else {
-                        image = tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                        //image = tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                        image = tokenMetadata.image.replace('ipfs://', 'https://openbisea.mypinata.cloud/ipfs/');
                     }
+                    //clone.querySelector(".listing-item-img").data-src = image;
+                    //console.log(  )
+
+
+                    console.log(image)
+                    clone.querySelector(".listing-item-img").setAttribute('data-src',image)
+                    // let images = document.querySelectorAll(".lazy");
+                    // new LazyLoad(images);
+                    // lazyTargets = document.querySelectorAll('.lazy');
+                    // lazyTargets.forEach(lazyLoad);
+                    
+                    console.log(clone.querySelector(".listing-item-img"))
+                    
                     auctionInfo.image = image;
                     auctionInfo.tokenID = tokenID;
                     auctionInfo.name = tokenMetadata.name;
@@ -719,10 +741,15 @@ document.addEventListener("DOMContentLoaded", function() {
             await Promise.all(rowResolversAuction);
         }
 
+        let images = document.querySelectorAll(".lazy");
+        new LazyLoad(images);
+
         // Display fully loaded UI for wallet data
         document.querySelector("#prepare").style.display = "none";
         document.querySelector("#connected").style.display = "block";
     }
+
+   
 
     /**
      * Fetch account data for UI when
