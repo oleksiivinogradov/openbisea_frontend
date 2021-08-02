@@ -254,64 +254,10 @@
 
 
 
-<script>
-//     $(document).on('DOMNodeInserted', 'img.lazy', function() {
-//   var lazyloadImages;    
 
-//   if ("IntersectionObserver" in window) {
-//     lazyloadImages = document.querySelectorAll(".lazy");
-//     var imageObserver = new IntersectionObserver(function(entries, observer) {
-//       entries.forEach(function(entry) {
-//         if (entry.isIntersecting) {
-//           var image = entry.target;
-//           image.src = image.dataset.src;
-//           image.classList.remove("lazy");
-//           imageObserver.unobserve(image);
-//         }
-//       });
-//     });
-
-//     lazyloadImages.forEach(function(image) {
-//       imageObserver.observe(image);
-//     });
-//   } else {  
-//     var lazyloadThrottleTimeout;
-//     lazyloadImages = document.querySelectorAll(".lazy");
-    
-//     function lazyload () {
-//       if(lazyloadThrottleTimeout) {
-//         clearTimeout(lazyloadThrottleTimeout);
-//       }    
-
-//       lazyloadThrottleTimeout = setTimeout(function() {
-//         var scrollTop = window.pageYOffset;
-//         lazyloadImages.forEach(function(img) {
-//             if(img.offsetTop < (window.innerHeight + scrollTop)) {
-//               img.src = img.dataset.src;
-//               img.classList.remove('lazy');
-//             }
-//         });
-//         if(lazyloadImages.length == 0) { 
-//           document.removeEventListener("scroll", lazyload);
-//           window.removeEventListener("resize", lazyload);
-//           window.removeEventListener("orientationChange", lazyload);
-//         }
-//       }, 20);
-//     }
-
-//     document.addEventListener("scroll", lazyload);
-//     window.addEventListener("resize", lazyload);
-//     window.addEventListener("orientationChange", lazyload);
-//   }
-//})
-
-
-  </script>
 
 <script>
     "use strict";
-
-
 
     /**
      * Example JavaScript code that interacts with the page and Web3 wallets
@@ -711,17 +657,8 @@
                     }
                     //clone.querySelector(".listing-item-img").data-src = image;
                     //console.log(  )
-
-
-                    console.log(image)
                     clone.querySelector(".listing-item-img").setAttribute('data-src',image)
-                    // let images = document.querySelectorAll(".lazy");
-                    // new LazyLoad(images);
-                    // lazyTargets = document.querySelectorAll('.lazy');
-                    // lazyTargets.forEach(lazyLoad);
-                    
-                    console.log(clone.querySelector(".listing-item-img"))
-                    
+                                        
                     auctionInfo.image = image;
                     auctionInfo.tokenID = tokenID;
                     auctionInfo.name = tokenMetadata.name;
