@@ -547,15 +547,24 @@
                     // clone.querySelector(".image").textContent = 'image';
                     // clone.querySelector(".image").href = tokenMetadata.image.replace('ipfs://','https://ipfs.io/ipfs/');
                     const priceFloat = parseFloat(await web3.utils.fromWei(auctionInfo.price))
-                    let price = priceFloat + ' BNB';
-                    if (auctionInfo.isUSD === true) price = priceFloat + " USD";
+                    let price
+                    if (auctionInfo.isUSD === true) {
+                        price = priceFloat.toFixed(2) + " USD";
+                    }else{
+                        price = priceFloat.toFixed(5) + ' BNB';
+                    }
+                    //let price = priceFloat + ' BNB';
+                    //if (auctionInfo.isUSD === true) price = priceFloat + " USD";
+                    
                     clone.querySelector(".price").textContent = price;
                     //clone.querySelector(".bidAmount").children[0].value = Math.round((priceFloat + 0.00001) * 100000) / 100000;
-                    clone.querySelector(".bidAmount").children[0].value = Math.round((priceFloat + 0.001) * 1000) / 1000;
-
+                    
                     if (auctionInfo.isUSD === true) {
                         clone.querySelector(".allow").children[0].style.display = "block"
                         clone.querySelector(".bid").children[0].setAttribute("disabled", "disabled")
+                        clone.querySelector(".bidAmount").children[0].value = Math.round((priceFloat + 0.001) * 1000) / 1000;
+                    }else{
+                        clone.querySelector(".bidAmount").children[0].value = Math.round((priceFloat + 0.00001) * 100000) / 100000;
                     }
                     var deadline = new Date(parseInt(auctionInfo.deadline) * 1000);
 
