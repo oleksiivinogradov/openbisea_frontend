@@ -111,7 +111,8 @@
                 
                 <div class="index" style="display: none;"></div>
                 <div class="name listing-item-name"></div>
-                <div class="listing-item-price">price</div>
+                <div class="description"></div>
+                <!-- <div class="listing-item-price">price</div> -->
                 <div class="price listing-item-price-number"></div>
 
                 <div class="listing-item-buynow bid">
@@ -536,10 +537,12 @@
                 if (response.ok) { // если HTTP-статус в диапазоне 200-299
                     // получаем тело ответа (см. про этот метод ниже)
                     let tokenMetadata = await response.json();
-                    // console.log('tokenMetadata ', tokenMetadata);
+                    console.log('tokenMetadata ', tokenMetadata);
+                    
                     const clone = templateAuction.content.cloneNode(true);
                     clone.querySelector(".name").textContent = tokenMetadata.name;
                     clone.querySelector(".index").textContent = index;
+                    clone.querySelector(".description").textContent = tokenMetadata.description;
 
                     // clone.querySelector(".image").textContent = 'image';
                     // clone.querySelector(".image").href = tokenMetadata.image.replace('ipfs://','https://ipfs.io/ipfs/');

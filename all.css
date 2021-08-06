@@ -145,6 +145,7 @@ body {
 
 .listing-item-img {
     max-width: 250px;
+    width: 100%;
 }
 
 .listing-item-name {
@@ -152,11 +153,15 @@ body {
     margin-bottom: 10px;
     font-size: 16px;
 }
+.description{
+    font-size: 12px;
+}
 
 .listing-item {
     display: flex;
     flex-direction: column;
     margin: 20px;
+    width: calc((100% / 3) - 40px);
 }
 
 .allow {
@@ -218,6 +223,12 @@ body {
     color: black;
     margin: 0 10px;
     font-weight: 600;
+}
+
+@media screen and (max-width:991.9px) {
+    .listing-item {
+        width: calc((100% / 2) - 40px);
+    }
 }
 
 @media screen and (max-width:767.9px) {
