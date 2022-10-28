@@ -1,0 +1,192 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<div class="container" style="display: table;margin-right: auto;margin-left: auto;text-align:center; max-width: 130px">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="alert alert-danger" id="alert-error-https" style="display: none">
+                You can run this example only over HTTPS connection.
+            </div>
+
+            <div id="prepare2">
+                <button class="btn btn-primary" id="btn-connect2" style="background-color: #fcbd24;color:black">
+                    Connect wallet
+                </button>
+                <br>
+                <br>
+
+            </div>
+
+            <div id="connected2" style="display: none; text-align: center;">
+
+                <button class="btn btn-primary" id="buymoto2" style="background-color: #fcbd24;color:black"> Buy now </button>
+                <br>
+
+                <span id="progress2" style="color:#fcbd24;display: none;"> Transaction in progress ...</span>
+                <hr>
+                <div id="resultstrans2" style="text-align: center;">
+                    <button class="btn btn-primary" id="buy-obs-result2" style="display: none;background-color: white;color:black;" > Check transaction status </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- We use simple <template> templating for the example -->
+    <div id="templates" style="display: none">
+        <template id="template-balance">
+            <tr>
+                <th class="address"></th>
+                <td class="balance"></td>
+            </tr>
+        </template>
+    </div>
+</div>
+
+<!--
+  Use unpkg CDN to load all NPM packages to vanilla Javascript - read more at http://unpkg.com
+  On your deployment, you properly either want to use a preprocessing tool like webpack
+  to include these files, or extract NPM archives and manually host the files inside.
+  TODO: Pin down all versions.
+-->
+
+<script type="text/javascript" src="https://unpkg.com/web3@1.8.0/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/web3modal@1.9.9/dist/index.js"></script>
+<script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+
+<script>
+    "use strict";
+
+    /**
+     * Example JavaScript code that interacts with the page and Web3 wallets
+     */
+    function getQueryParams(qs) {
+        qs = qs.split('+').join(' ');
+
+        var params = {},
+            tokens,
+            re = /[?&]?([^=]+)=([^&]*)/g;
+
+        while (tokens = re.exec(qs)) {
+            params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+        }
+
+        return params;
+    }
+
+    /**
+     * Connect wallet button pressed.
+     */
+    async function onConnect2 () {
+
+        console.log("Opening a dialog1", web3Modal);
+        try {
+            provider = await web3Modal.connect();
+        } catch (e) {
+            console.log("Could not get a wallet connection", e);
+            return;
+        }
+
+        // Subscribe to accounts change
+        provider.on("accountsChanged", (accounts) => {
+            fetchAccountData();
+        });
+
+        // Subscribe to chainId change
+        provider.on("chainChanged", (chainId) => {
+            fetchAccountData();
+        });
+
+        // Subscribe to networkId change
+        provider.on("networkChanged", (networkId) => {
+            fetchAccountData();
+        });
+
+        await refreshAccountData();
+    }
+
+    /**
+     * Disconnect wallet button pressed.
+     */
+
+    /**
+     * onResultClick button pressed.
+     */
+    async function onResultClick () {
+        window.open(resultURL, '_blank').focus();
+    }
+    async function onBuyMoto2 () {
+        console.log('onBuyMoto2()');
+
+        document.querySelector("#progress2").style.display = "block";
+        document.querySelector("#buymoto2").disabled = true;
+
+        let countDots = 0;
+        let sendOrderStatus = setInterval(async function () {
+            let phrase = "Transaction in progress " + ".".repeat(countDots);
+            document.querySelector("#progress2").textContent = phrase;
+            countDots++;
+            if (countDots === 4) countDots = 0;
+        }, 1000);
+        const web3 = new Web3(provider);
+        const chainId = await web3.eth.getChainId();
+        if (chainId !== 137) {
+            document.querySelector("#progress2").textContent = "We support only Polygon mainnet";
+            document.querySelector("#buymoto2").disabled = true;
+            return;
+        }
+
+        const nftABI = JSON.parse('[{"inputs":[{"internalType":"uint256","name":"networkId","type":"uint256"},{"internalType":"address","name":"_gameServer","type":"address"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"AddHealthMoney","type":"event","signature":"0x0b2510d0bfc9ef2049ed23358555876a47f19f394c0fe9b8f8ff0d505d083c8a"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"healthPillTokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"healthDiff","type":"uint256"}],"name":"AddHealthNFT","type":"event","signature":"0x16832fc0929a5b5addef2dcc09d51213ebd017ca2f4f3008328547dc1e4456d9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event","signature":"0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"},{"indexed":false,"internalType":"uint8","name":"typeNft","type":"uint8"},{"indexed":false,"internalType":"uint8","name":"finalTypeNft","type":"uint8"}],"name":"Purchase","type":"event","signature":"0x73e671c9734532d5ee1dd14c84d0fc071a3fb20fc994426819ee1cca0c3b39f2"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event","signature":"0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"},{"inputs":[],"name":"BROWN_KILLER","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x22c31c83"},{"inputs":[],"name":"CRAZY_LINE","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf707d8c6"},{"inputs":[],"name":"HEALTH_PILL_10","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xd2818e4d"},{"inputs":[],"name":"HEALTH_PILL_30","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x99517c74"},{"inputs":[],"name":"HEALTH_PILL_5","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3422183f"},{"inputs":[],"name":"HEALTH_PILL_50","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xedf56952"},{"inputs":[],"name":"MAGIC_BOX","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x919b7483"},{"inputs":[],"name":"METAL_EYES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8afc87b8"},{"inputs":[],"name":"RED_BULLER","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe0e28944"},{"inputs":[],"name":"ROBO_HORSE","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4a58e1f9"},{"inputs":[],"name":"TRACK_ABU_DHABI","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0319430c"},{"inputs":[],"name":"TRACK_BEIJIN","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xcf332d5d"},{"inputs":[],"name":"TRACK_DUBAI","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc53e2a78"},{"inputs":[],"name":"TRACK_ISLAMABAD","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4236d81c"},{"inputs":[],"name":"TRACK_LONDON","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xa1fe2396"},{"inputs":[],"name":"TRACK_MELBURN","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x479d26ec"},{"inputs":[],"name":"TRACK_MOSCOW","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0a149b62"},{"inputs":[],"name":"TRACK_PETERBURG","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x755a9274"},{"inputs":[],"name":"TRACK_PISA","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3ca1abad"},{"inputs":[],"name":"TRACK_TAIPEI","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x556724c3"},{"inputs":[],"name":"ZEBRA_GRRR","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x89a3cbd1"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42966c68"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"counterForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf1637157"},{"inputs":[],"name":"gameServer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x29cd564c"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"healthForId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x96569002"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"limitForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x7cfa7258"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x5c975abb"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"percentForTrack","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf27ed887"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"players","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf71d96cb"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"priceForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xa67d3109"},{"inputs":[],"name":"priceMainCoinUSD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x9fb2102c"},{"inputs":[],"name":"referralPercent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x343dfb7e"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"typeForId","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x73a5cb42"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"uriForType","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf13710e6"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getPercentForTrack","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x22a5c374"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint8","name":"percent","type":"uint8"}],"name":"setPercentForTrack","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x59cb4ec1"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint8","name":"percent","type":"uint8"}],"name":"setPercentForTrackOwner","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x2be84572"},{"inputs":[],"name":"getPriceMainCoinUSD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8a93710a"},{"inputs":[{"internalType":"uint256","name":"price","type":"uint256"}],"name":"setPriceMainCoinUSD","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xc60ce4cf"},{"inputs":[],"name":"getLatestPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8e15f473"},{"inputs":[{"internalType":"address","name":"buyer","type":"address"}],"name":"getReferral","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3b0f0f2f"},{"inputs":[{"internalType":"address","name":"buyer","type":"address"},{"internalType":"address","name":"referral","type":"address"}],"name":"_setReferral","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x215cba86"},{"inputs":[{"internalType":"string","name":"uri","type":"string"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"setUriForType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x5724e3fe"},{"inputs":[{"internalType":"uint256","name":"limit","type":"uint256"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"setLimitForType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x7348c063"},{"inputs":[{"internalType":"uint256","name":"price","type":"uint256"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"setPriceForType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x46421878"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"health","type":"uint256"}],"name":"setHealthForId","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xc02b585a"},{"inputs":[{"internalType":"address","name":"_gameServer","type":"address"}],"name":"setGameServer","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb3bd6a27"},{"inputs":[],"name":"getGameServer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x9f0063af"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"getPriceForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6b7629af"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"getLimitForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x935a3c27"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"getUriForType","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x12bdc771"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getHealthForId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xa45e6c55"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getTypeForId","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xd6a4e18f"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x8456cb59"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x3f4ba83a"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"uri","type":"string"}],"name":"safeMint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd204c45e"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"uri","type":"string"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"safeMintType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x06d3fd0f"},{"inputs":[{"internalType":"address[]","name":"to","type":"address[]"},{"internalType":"uint8[]","name":"typesNft","type":"uint8[]"}],"name":"safeMintTypeBatch","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23183ed9"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"valueInMainCoin","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x431d1726"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"},{"internalType":"address","name":"referral","type":"address"}],"name":"purchase","outputs":[],"stateMutability":"payable","type":"function","payable":true,"signature":"0x1cbe7553"},{"inputs":[{"internalType":"uint8[]","name":"typesNft","type":"uint8[]"},{"internalType":"address","name":"referral","type":"address"}],"name":"purchaseBatch","outputs":[],"stateMutability":"payable","type":"function","payable":true,"signature":"0x1f274fc0"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"addHealthMoney","outputs":[],"stateMutability":"payable","type":"function","payable":true,"signature":"0xa1f6c54a"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"healthPillTokenId","type":"uint256"}],"name":"addHealthNFT","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xcf57564e"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[{"internalType":"bytes[]","name":"data","type":"bytes[]"}],"name":"multicall","outputs":[{"internalType":"bytes[]","name":"results","type":"bytes[]"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xac9650d8"}]');
+        let nftAddress = '0x5Af7582abbC3C86Aedea3C1a55e8900602b8e2d0';
+        const nftContract = new web3.eth.Contract(nftABI, nftAddress);
+        let valueInMainCoin = await nftContract.methods.valueInMainCoin('5').call();
+        console.log('nftContract valueInMainCoin:', valueInMainCoin);
+
+        let purchaseResult = await nftContract.methods.purchase('5', '0x0000000000000000000000000000000000000000').send({
+            from: selectedAccount,
+            chainId: chainId,
+            value:valueInMainCoin
+        }).catch((err) => {
+            console.log('err->' + JSON.stringify(err) );
+            document.querySelector("#progress2").style.display = "block";
+            document.querySelector("#progress2").textContent = err.message;
+            document.querySelector("#buymoto2").disabled = false;
+        });
+
+        if (purchaseResult !== undefined) {
+            console.log('purchaseResult:', purchaseResult.transactionHash);
+            document.querySelector("#buy-obs-result2").style.display = "inline-block";
+            resultURL = "https://polygonscan.com/tx/" + purchaseResult.transactionHash
+            document.querySelector("#progress2").style.display = "none";
+            document.querySelector("#buymoto2").disabled = false;
+        } else {
+            // document.querySelector("#obsamount").textContent = "Result undefined";
+            document.querySelector("#progress2").style.display = "none";
+            document.querySelector("#buymoto2").disabled = false;
+        }
+        clearInterval(sendOrderStatus);
+    }
+
+    /**
+     * Main entry point.
+     */
+    window.addEventListener('load', async () => {
+        //init();
+        document.querySelector("#btn-connect2").addEventListener("click", onConnect2);
+        //document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
+        document.querySelector("#buymoto2").addEventListener("click", onBuyMoto2);
+        // document.querySelector("#amount").addEventListener("input", onAmountChange);
+        document.querySelector("#buy-obs-result2").addEventListener("click", onResultClick);
+    });
+
+    // window.onload = function () {
+    //     init()
+    // }
+</script>
+<script>
+    (function () {
+
+    })();
+</script>
