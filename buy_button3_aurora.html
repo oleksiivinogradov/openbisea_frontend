@@ -8,8 +8,8 @@
                 You can run this example only over HTTPS connection.
             </div>
 
-            <div id="prepare">
-                <button class="btn btn-primary" id="btn-connect" style="background-color: #fcbd24;color:black">
+            <div id="prepare3">
+                <button class="btn btn-primary" id="btn-connect3" style="background-color: #fcbd24;color:black">
                     Connect wallet
                 </button>
                 <br>
@@ -17,15 +17,15 @@
 
             </div>
 
-            <div id="connected" style="display: none; text-align: center;">
+            <div id="connected3" style="display: none; text-align: center;">
 
-                <button class="btn btn-primary" id="buymoto" style="background-color: #fcbd24;color:black"> Buy now </button>
+                <button class="btn btn-primary" id="buymoto3" style="background-color: #fcbd24;color:black"> Buy now </button>
                 <br>
 
-                <span id="progress" style="color:#fcbd24;display: none;"> Transaction in progress ...</span>
+                <span id="progress3" style="color:#fcbd24;display: none;"> Transaction in progress ...</span>
                 <hr>
-                <div id="resultstrans" style="text-align: center;">
-                    <button class="btn btn-primary" id="buy-obs-result" style="display: none;background-color: white;color:black;" > Check transaction status </button>
+                <div id="resultstrans3" style="text-align: center;">
+                    <button class="btn btn-primary" id="buy-obs-result3" style="display: none;background-color: white;color:black;" > Check transaction status </button>
                 </div>
 
             </div>
@@ -75,268 +75,13 @@
 
         return params;
     }
-    // Unpkg imports
-    const Web3Modal = window.Web3Modal.default;
-    const WalletConnectProvider = window.WalletConnectProvider.default;
-    const Fortmatic = window.Fortmatic;
-    const evmChains = window.evmChains;
-
-    // Web3modal instance
-    let web3Modal
-
-    // Chosen wallet provider given by the dialog window
-    let provider;
-
-    // Address of the selected account
-    let selectedAccount;
-
-    //bscan
-    let resultURL;
-    /**
-     * Setup the orchestra
-     */
-    function init () {
-
-        console.log("Initializing example");
-        console.log("WalletConnectProvider is", window.WalletConnectProvider.default);
-        console.log("Fortmatic is", Fortmatic);
-        console.log("window.web3 is", window.web3, "window.ethereum is", window.ethereum);
-
-        // Check that the web page is run in a secure context,
-        // as otherwise MetaMask won't be available
-        if (location.protocol !== 'https:') {
-            // https://ethereum.stackexchange.com/a/62217/620
-            const alert = document.querySelector("#alert-error-https");
-            alert.style.display = "block";
-            document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
-            return;
-        }
-
-        let query = getQueryParams(document.location.search);
-        if (query !== undefined && query.tokenID !== undefined) {
-            document.querySelector("#tokenID").value = query.tokenID;
-        }
-        // Tell Web3modal what providers we have available.
-        // Built-in web browser provider (only one can exist as a time)
-        // like MetaMask, Brave or Opera is added automatically by Web3modal
-        const providerOptions = {
-            walletconnect: {
-                package: window.WalletConnectProvider.default,
-                options: {
-                    // Mikko's test key - don't copy as your mileage may vary
-                    infuraId: "bb7b522604e54a2f8ad251e7417b2355",
-                }
-            },
-
-            // fortmatic: {
-            //   package: Fortmatic,
-            //   options: {
-            //     // Mikko's TESTNET api key
-            //     key: "pk_test_391E26A3B43A3350"
-            //   }
-            // }
-        };
-
-        web3Modal = new window.Web3Modal.default({
-            cacheProvider: false, // optional
-            providerOptions, // required
-            disableInjectedProvider: false, // optional. For MetaMask / Brave / Opera.
-        });
-
-        console.log("Web3Modal instance is", web3Modal);
-        fetchAccountData ();
-        // let attempts = 0;
-        // let sendOrderStatus = setInterval(async function () {
-        //     if (window.BinanceChain !== undefined) {
-        //         clearInterval(sendOrderStatus);
-        //         console.log("YES window.BinanceChain ");
-        //
-        //         const BinanceChain = window.BinanceChain;
-        //         provider = BinanceChain;
-        //
-        //         let currentChainId = BinanceChain.chainId;
-        //         console.log('currentChainId:' + currentChainId);
-        //
-        //         BinanceChain.on('chainChanged', handleChainChanged);
-        //
-        //         function handleChainChanged(_chainId) {
-        //             // We recommend reloading the page, unless you must do otherwise
-        //             window.location.reload();
-        //         }
-        //         let currentAccount = null;
-        //         BinanceChain
-        //             .request({ method: 'eth_accounts' })
-        //             .then(handleAccountsChanged)
-        //             .catch((err) => {
-        //                 // Some unexpected error.
-        //                 // For backwards compatibility reasons, if no accounts are available,
-        //                 // eth_accounts will return an empty array.
-        //                 console.error(err);
-        //             });
-        //
-        //         BinanceChain.on('accountsChanged', handleAccountsChanged);
-        //
-        //         function handleAccountsChanged(accounts) {
-        //             if (accounts.length === 0) {
-        //                 // Binance Chain Wallet is locked or the user has not connected any accounts
-        //                 console.log('Please connect to Binance Chain Wallet.');
-        //             } else if (accounts[0] !== currentAccount) {
-        //                 currentAccount = accounts[0];
-        //                 console.log('currentAccount:' + currentAccount);
-        //                 fetchAccountData ()
-        //                 // Do any other work!
-        //             }
-        //         }
-        //         BinanceChain
-        //             .request({ method: 'eth_requestAccounts' })
-        //             .then(handleAccountsChanged)
-        //             .catch((err) => {
-        //                 if (err.code === 4001) {
-        //                     // EIP-1193 userRejectedRequest error
-        //                     // If this happens, the user rejected the connection request.
-        //                     console.log('Please connect to MetaMask.');
-        //                 } else {
-        //                     console.error(err);
-        //                 }
-        //             });
-        //
-        //     } else {
-        //         console.log("NO window.BinanceChain ");
-        //         attempts = attempts + 1;
-        //         if (attempts > 5) {
-        //             clearInterval(sendOrderStatus);
-        //         }
-        //     }
-        // }, 5000);
-
-    }
-
-    /**
-     * Kick in the UI action after Web3modal dialog has chosen a provider
-     */
-    async function fetchAccountData () {
-
-        // Get a Web3 instance for the wallet
-        const web3 = new Web3(provider);
-
-        console.log("Web3 instance is", web3);
-
-        // Get connected chain id from Ethereum node
-        const chainId = await web3.eth.getChainId();
-        // Load chain information over an HTTP API
-        console.log("Web3 chainId is", chainId);
-        if (chainId !== 1313161554) {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: web3.utils.toHex(1313161554) }]
-                });
-            } catch (err) {
-                // This error code indicates that the chain has not been added to MetaMask
-                if (err.code === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [
-                            {
-                                chainName: 'Aurora Mainnet',
-                                chainId: web3.utils.toHex(1313161554),
-                                nativeCurrency: { name: 'ETH', decimals: 18, symbol: 'ETH' },
-                                rpcUrls: ['https://mainnet.aurora.dev']
-                            }
-                        ]
-                    });
-                }
-            }
-        }
-
-        const chainData = evmChains.getChain(chainId);
-        console.log("Web3 chainData is", chainData);
-
-        //document.querySelector("#network-name").textContent = chainData.name;
-
-        // Get list of accounts of the connected wallet
-        const accounts = await web3.eth.getAccounts();
-
-        // MetaMask does not give you all accounts, only the selected account
-        console.log("Got accounts", accounts);
-        selectedAccount = accounts[0];
-
-        //document.querySelector("#selected-account").textContent = selectedAccount;
-
-        // Get a handl
-        // const template = document.querySelector("#template-balance");
-        // const accountContainer = document.querySelector("#accounts");
-        //
-        // // Purge UI elements any previously loaded accounts
-        // accountContainer.innerHTML = '';
-        //
-        // // Go through all accounts and get their ETH balance
-        // const rowResolvers = accounts.map(async (address) => {
-        //     const balance = await web3.eth.getBalance(address);
-        //     // ethBalance is a BigNumber instance
-        //     // https://github.com/indutny/bn.js/
-        //     const ethBalance = web3.utils.fromWei(balance, "ether");
-        //     const humanFriendlyBalance = parseFloat(ethBalance).toFixed(4);
-        //     // Fill in the templated row and put in the document
-        //     const clone = template.content.cloneNode(true);
-        //     clone.querySelector(".address").textContent = address;
-        //     clone.querySelector(".balance").textContent = humanFriendlyBalance;
-        //     accountContainer.appendChild(clone);
-        // });
-        //
-        // // Because rendering account does its own RPC commucation
-        // // with Ethereum node, we do not want to display any results
-        // // until data for all accounts is loaded
-        // await Promise.all(rowResolvers);
-
-        // Display fully loaded UI for wallet data
-        document.querySelector("#prepare").style.display = "none";
-        document.querySelector("#connected").style.display = "block";
-        document.querySelector("#prepare1").style.display = "none";
-        document.querySelector("#connected1").style.display = "block";
-        document.querySelector("#prepare2").style.display = "none";
-        document.querySelector("#connected2").style.display = "block";
-        document.querySelector("#prepare3").style.display = "none";
-        document.querySelector("#connected3").style.display = "block";
-        document.querySelector("#prepare4").style.display = "none";
-        document.querySelector("#connected4").style.display = "block";
-        document.querySelector("#prepare5").style.display = "none";
-        document.querySelector("#connected5").style.display = "block";
-        document.querySelector("#prepare6").style.display = "none";
-        document.querySelector("#connected6").style.display = "block";
-    }
-
-    /**
-     * Fetch account data for UI when
-     * - User switches accounts in wallet
-     * - User switches networks in wallet
-     * - User connects wallet initially
-     */
-    async function refreshAccountData () {
-
-        // If any current data is displayed when
-        // the user is switching acounts in the wallet
-        // immediate hide this data
-        document.querySelector("#connected").style.display = "none";
-        document.querySelector("#prepare").style.display = "block";
-        document.querySelector("#connected1").style.display = "none";
-        document.querySelector("#prepare1").style.display = "block";
-
-        // Disable button while UI is loading.
-        // fetchAccountData() will take a while as it communicates
-        // with Ethereum node via JSON-RPC and loads chain data
-        // over an API call.
-        document.querySelector("#btn-connect").setAttribute("disabled", "disabled")
-        await fetchAccountData(provider);
-        document.querySelector("#btn-connect").removeAttribute("disabled")
-    }
 
     /**
      * Connect wallet button pressed.
      */
-    async function onConnect () {
+    async function onConnect2 () {
 
-        console.log("Opening a dialog", web3Modal);
+        console.log("Opening a dialog1", web3Modal);
         try {
             provider = await web3Modal.connect();
         } catch (e) {
@@ -365,84 +110,61 @@
     /**
      * Disconnect wallet button pressed.
      */
-    async function onDisconnect () {
 
-        console.log("Killing the wallet connection", provider);
-
-        // TODO: Which providers have close method?
-        if (provider.close) {
-            await provider.close();
-
-            // If the cached provider is not cleared,
-            // WalletConnect will default to the existing session
-            // and does not allow to re-scan the QR code with a new wallet.
-            // Depending on your use case you may want or want not his behavir.
-            await web3Modal.clearCachedProvider();
-            provider = null;
-        }
-
-        selectedAccount = null;
-
-        // Set the UI back to the initial state
-        document.querySelector("#prepare").style.display = "block";
-        document.querySelector("#connected").style.display = "none";
-        document.querySelector("#prepare1").style.display = "block";
-        document.querySelector("#connected1").style.display = "none";
-    }
     /**
      * onResultClick button pressed.
      */
     async function onResultClick () {
         window.open(resultURL, '_blank').focus();
     }
-    async function onBuyMoto () {
-        console.log('onBuyMoto()');
+    async function onBuyMoto3 () {
+        console.log('onBuyMoto3()');
 
-        document.querySelector("#progress").style.display = "block";
-        document.querySelector("#buymoto").disabled = true;
+        document.querySelector("#progress3").style.display = "block";
+        document.querySelector("#buymoto3").disabled = true;
 
         let countDots = 0;
         let sendOrderStatus = setInterval(async function () {
             let phrase = "Transaction in progress " + ".".repeat(countDots);
-            document.querySelector("#progress").textContent = phrase;
+            document.querySelector("#progress3").textContent = phrase;
             countDots++;
             if (countDots === 4) countDots = 0;
         }, 1000);
         const web3 = new Web3(provider);
         const chainId = await web3.eth.getChainId();
         if (chainId !== 1313161554) {
-            document.querySelector("#progress").textContent = "We support only Aurora mainnet";
-            document.querySelector("#buymoto").disabled = true;
+            document.querySelector("#progress3").textContent = "We support only Aurora mainnet";
+            document.querySelector("#buymoto3").disabled = true;
             return;
         }
 
         const nftABI = JSON.parse('[{"inputs":[{"internalType":"uint256","name":"networkId","type":"uint256"},{"internalType":"address","name":"_gameServer","type":"address"}],"stateMutability":"nonpayable","type":"constructor","signature":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"AddHealthMoney","type":"event","signature":"0x0b2510d0bfc9ef2049ed23358555876a47f19f394c0fe9b8f8ff0d505d083c8a"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"healthPillTokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"healthDiff","type":"uint256"}],"name":"AddHealthNFT","type":"event","signature":"0x16832fc0929a5b5addef2dcc09d51213ebd017ca2f4f3008328547dc1e4456d9"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event","signature":"0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event","signature":"0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event","signature":"0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event","signature":"0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"},{"indexed":false,"internalType":"uint8","name":"typeNft","type":"uint8"},{"indexed":false,"internalType":"uint8","name":"finalTypeNft","type":"uint8"}],"name":"Purchase","type":"event","signature":"0x73e671c9734532d5ee1dd14c84d0fc071a3fb20fc994426819ee1cca0c3b39f2"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event","signature":"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event","signature":"0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"},{"inputs":[],"name":"BROWN_KILLER","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x22c31c83"},{"inputs":[],"name":"CRAZY_LINE","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf707d8c6"},{"inputs":[],"name":"HEALTH_PILL_10","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xd2818e4d"},{"inputs":[],"name":"HEALTH_PILL_30","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x99517c74"},{"inputs":[],"name":"HEALTH_PILL_5","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3422183f"},{"inputs":[],"name":"HEALTH_PILL_50","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xedf56952"},{"inputs":[],"name":"MAGIC_BOX","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x919b7483"},{"inputs":[],"name":"METAL_EYES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8afc87b8"},{"inputs":[],"name":"RED_BULLER","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe0e28944"},{"inputs":[],"name":"ROBO_HORSE","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4a58e1f9"},{"inputs":[],"name":"TRACK_ABU_DHABI","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0319430c"},{"inputs":[],"name":"TRACK_BEIJIN","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xcf332d5d"},{"inputs":[],"name":"TRACK_DUBAI","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc53e2a78"},{"inputs":[],"name":"TRACK_ISLAMABAD","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4236d81c"},{"inputs":[],"name":"TRACK_LONDON","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xa1fe2396"},{"inputs":[],"name":"TRACK_MELBURN","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x479d26ec"},{"inputs":[],"name":"TRACK_MOSCOW","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x0a149b62"},{"inputs":[],"name":"TRACK_PETERBURG","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x755a9274"},{"inputs":[],"name":"TRACK_PISA","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3ca1abad"},{"inputs":[],"name":"TRACK_TAIPEI","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x556724c3"},{"inputs":[],"name":"ZEBRA_GRRR","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x89a3cbd1"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x095ea7b3"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x70a08231"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42966c68"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"counterForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf1637157"},{"inputs":[],"name":"gameServer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x29cd564c"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x081812fc"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"healthForId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x96569002"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xe985e9c5"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"limitForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x7cfa7258"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x06fdde03"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8da5cb5b"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6352211e"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x5c975abb"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"percentForTrack","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf27ed887"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"players","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf71d96cb"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"priceForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xa67d3109"},{"inputs":[],"name":"priceMainCoinUSD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x9fb2102c"},{"inputs":[],"name":"referralPercent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x343dfb7e"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x715018a6"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x42842e0e"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb88d4fde"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xa22cb465"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x95d89b41"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x4f6ccce7"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x2f745c59"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x18160ddd"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23b872dd"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xf2fde38b"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"typeForId","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x73a5cb42"},{"inputs":[{"internalType":"uint8","name":"","type":"uint8"}],"name":"uriForType","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xf13710e6"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getPercentForTrack","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x22a5c374"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint8","name":"percent","type":"uint8"}],"name":"setPercentForTrack","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x59cb4ec1"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint8","name":"percent","type":"uint8"}],"name":"setPercentForTrackOwner","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x2be84572"},{"inputs":[],"name":"getPriceMainCoinUSD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8a93710a"},{"inputs":[{"internalType":"uint256","name":"price","type":"uint256"}],"name":"setPriceMainCoinUSD","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xc60ce4cf"},{"inputs":[],"name":"getLatestPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x8e15f473"},{"inputs":[{"internalType":"address","name":"buyer","type":"address"}],"name":"getReferral","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x3b0f0f2f"},{"inputs":[{"internalType":"address","name":"buyer","type":"address"},{"internalType":"address","name":"referral","type":"address"}],"name":"_setReferral","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x215cba86"},{"inputs":[{"internalType":"string","name":"uri","type":"string"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"setUriForType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x5724e3fe"},{"inputs":[{"internalType":"uint256","name":"limit","type":"uint256"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"setLimitForType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x7348c063"},{"inputs":[{"internalType":"uint256","name":"price","type":"uint256"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"setPriceForType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x46421878"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"health","type":"uint256"}],"name":"setHealthForId","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xc02b585a"},{"inputs":[{"internalType":"address","name":"_gameServer","type":"address"}],"name":"setGameServer","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xb3bd6a27"},{"inputs":[],"name":"getGameServer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x9f0063af"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"getPriceForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x6b7629af"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"getLimitForType","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x935a3c27"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"getUriForType","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x12bdc771"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getHealthForId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xa45e6c55"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getTypeForId","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xd6a4e18f"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x8456cb59"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x3f4ba83a"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"uri","type":"string"}],"name":"safeMint","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xd204c45e"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"string","name":"uri","type":"string"},{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"safeMintType","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x06d3fd0f"},{"inputs":[{"internalType":"address[]","name":"to","type":"address[]"},{"internalType":"uint8[]","name":"typesNft","type":"uint8[]"}],"name":"safeMintTypeBatch","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0x23183ed9"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"}],"name":"valueInMainCoin","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x431d1726"},{"inputs":[{"internalType":"uint8","name":"typeNft","type":"uint8"},{"internalType":"address","name":"referral","type":"address"}],"name":"purchase","outputs":[],"stateMutability":"payable","type":"function","payable":true,"signature":"0x1cbe7553"},{"inputs":[{"internalType":"uint8[]","name":"typesNft","type":"uint8[]"},{"internalType":"address","name":"referral","type":"address"}],"name":"purchaseBatch","outputs":[],"stateMutability":"payable","type":"function","payable":true,"signature":"0x1f274fc0"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"addHealthMoney","outputs":[],"stateMutability":"payable","type":"function","payable":true,"signature":"0xa1f6c54a"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"healthPillTokenId","type":"uint256"}],"name":"addHealthNFT","outputs":[],"stateMutability":"nonpayable","type":"function","signature":"0xcf57564e"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function","constant":true,"signature":"0xc87b56dd"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function","constant":true,"signature":"0x01ffc9a7"},{"inputs":[{"internalType":"bytes[]","name":"data","type":"bytes[]"}],"name":"multicall","outputs":[{"internalType":"bytes[]","name":"results","type":"bytes[]"}],"stateMutability":"payable","type":"function","payable":true,"signature":"0xac9650d8"}]');
         let nftAddress = '0x761F95f7B78F81bCDAA42cFe0E1c13Bfb6a43643';
         const nftContract = new web3.eth.Contract(nftABI, nftAddress);
-        let valueInMainCoin = await nftContract.methods.valueInMainCoin('0').call();
+        let valueInMainCoin = await nftContract.methods.valueInMainCoin('100').call();
         console.log('nftContract valueInMainCoin:', valueInMainCoin);
 
-        let purchaseResult = await nftContract.methods.purchase('0', '0x0000000000000000000000000000000000000000').send({
+        let purchaseResult = await nftContract.methods.purchase('100', '0x0000000000000000000000000000000000000000').send({
             from: selectedAccount,
             chainId: chainId,
             value:valueInMainCoin
         }).catch((err) => {
             console.log('err->' + JSON.stringify(err) );
-            document.querySelector("#progress").style.display = "block";
-            document.querySelector("#progress").textContent = err.message;
-            document.querySelector("#buymoto").disabled = false;
+            document.querySelector("#progress3").style.display = "block";
+            document.querySelector("#progress3").textContent = err.message;
+            document.querySelector("#buymoto3").disabled = false;
         });
 
         if (purchaseResult !== undefined) {
             console.log('purchaseResult:', purchaseResult.transactionHash);
-            document.querySelector("#buy-obs-result").style.display = "inline-block";
+            document.querySelector("#buy-obs-result3").style.display = "inline-block";
             resultURL = "https://aurorascan.dev/tx/" + purchaseResult.transactionHash
-            document.querySelector("#progress").style.display = "none";
-            document.querySelector("#buymoto").disabled = false;
+            document.querySelector("#progress3").style.display = "none";
+            document.querySelector("#buymoto3").disabled = false;
         } else {
             // document.querySelector("#obsamount").textContent = "Result undefined";
-            document.querySelector("#progress").style.display = "none";
-            document.querySelector("#buymoto").disabled = false;
+            document.querySelector("#progress3").style.display = "none";
+            document.querySelector("#buymoto3").disabled = false;
         }
         clearInterval(sendOrderStatus);
     }
@@ -452,16 +174,16 @@
      */
     window.addEventListener('load', async () => {
         //init();
-        document.querySelector("#btn-connect").addEventListener("click", onConnect);
+        document.querySelector("#btn-connect3").addEventListener("click", onConnect2);
         //document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
-        document.querySelector("#buymoto").addEventListener("click", onBuyMoto);
+        document.querySelector("#buymoto3").addEventListener("click", onBuyMoto3);
         // document.querySelector("#amount").addEventListener("input", onAmountChange);
-        document.querySelector("#buy-obs-result").addEventListener("click", onResultClick);
+        document.querySelector("#buy-obs-result3").addEventListener("click", onResultClick);
     });
 
-    window.onload = function () {
-        init()
-    }
+    // window.onload = function () {
+    //     init()
+    // }
 </script>
 <script>
     (function () {
